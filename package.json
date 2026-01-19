@@ -1,0 +1,11 @@
+{
+  "name": "hyb",
+  "version": "1.0.0",
+  "description": "Help you buddies with all they need.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ravi Raj",
+  "license": "ISC"
+}
