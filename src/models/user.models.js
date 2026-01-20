@@ -1,129 +1,94 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
-const userSchema = new mongoose.Schema(
-  {
-    fullName: {
-      type: String,
-      required: true,
-      trim: true
-    },
-
-    userName: {
-      type: String,
-      required: [true, 'uaername is required'],
-      unique: true,
-      lowercase: true,
-      trim: true
-    },
-
-    email: {
-      type: String,
-      required: [true, 'email is required'],
-      unique: true,
-      lowercase: true,
-      trim: true
-    },
-
-    password: {
-      type: String,
-      required: [true, 'password is required'],
-      minlength: 6,
-      select: false
-    },
-
-    branch: {
-      type: String,
-      required: [true, 'Branch is required'],
-      trim: true
-    },
-
-    year: {
-      type: Number,
-      required: [true, 'year is required'],
-      min: 1,
-      max: 6
-    },
-
-    hostel: {
-      type: String,
-      trim: true
-    },
-
-    avatar: {
-      type: String // cloudinary url
-    },
-
-    helpCount: {
-      type: Number,
-      default: 0
-    },
-
-  
-     //  REFERENCES (RELATIONS)
-  
-
-    requestsCreated: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Request"
-      }
-    ],
-
-    responsesGiven: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Response"
-      }
-    ],
-
-    chats: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Chat"
-      }
-    ],
-
-
-    refreshToken: {
-      type: String,
-      select: false
-    }
+const userSchema = new mongoose.Schema({
+  fullName: {
+    type: String,
+    required: [true, 'Full name is required'],
+    trim: true,
+    minlength: [2, 'Name must be at least 2 characters']
   },
-  {
-    timestamps: true
+  userName: {
+    type: String,
+    required: [true, 'Username is required'],
+    unique: true,
+    trim: true,
+    lowercase: true,
+    minlength: [3, 'Username must be at least 3 characters'],
+    match: [/^[a-z0-9_]+$/, 'Username can only contain lowercase letters, numbers, and underscores']
+  },
+  email: {
+    type: String,
+    required: [true, 'Email is required'],
+    unique: true,
+    trim: true,
+    lowercase: true,
+    match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email']
+  },
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
+    minlength: [6, 'Password must be at least 6 characters'],
+    select: false // Don't return password by default
+  },
+  branch: {
+    type: String,
+    enum: ['CSE', 'ECE', 'EE', 'ME', 'CE', 'IT', 'Other'],
+    default: 'Other'
+  },
+  year: {
+    type: Number,
+    min: 1,
+    max: 5
+  },
+  hostel: {
+    type: String,
+    trim: true
+  },
+  avatar: {
+    type: String,
+    default: null
+  },
+  helpCount: {
+    type: Number,
+    default: 0
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
   }
-);
-
-///  Hash password
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
+}, {
+  timestamps: true
 });
 
-///  Compare password
-userSchema.methods.isPasswordCorrect = async function (password) {
-  return bcrypt.compare(password, this.password);
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Compare password method
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
-///  Access Token (minimal)
-userSchema.methods.generateAccessToken = function () {
-  return jwt.sign(
-    { _id: this._id },
-    process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
-  );
+// Remove sensitive data
+userSchema.methods.toJSON = function() {
+  const obj = this.toObject();
+  delete obj.password;
+  delete obj.__v;
+  return obj;
 };
 
-///  Refresh Token
-userSchema.methods.generateRefreshToken = function () {
-  return jwt.sign(
-    { _id: this._id },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
-  );
-};
-
-export const User = mongoose.model("User", userSchema);
+module.exports = mongoose.model('User', userSchema);

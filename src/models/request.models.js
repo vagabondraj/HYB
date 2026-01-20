@@ -1,83 +1,80 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-const requestSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      required: [true,'title is required'],
-      trim: true,
-      maxlength: 120
-    },
-
-    description: {
-      type: String,
-      required: [true,'description is required'],
-      trim: true
-    },
-
-    category: {
-      type: String,
-      required: [true,'category is required'],
-      enum: ["kits", "medicine", "sports", "dress", "notes", "question", "other"]
-    },
-
-    urgency: {
-      type: String,
-      enum: ["normal", "urgent"],
-      default: "normal"
-    },
-
-    image: {
-      type: String // optional image url
-    },
-
-    status: {
-      type: String,
-      enum: ["open", "in-progress", "fulfilled", "expired"],
-      default: "open"
-    },
-
-    requestedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true
-    },
-
-    locationHint: {
-      type: String,
-      trim: true
-    },
-
-    contactPreference: {
-      type: String,
-      enum: ["chat", "call"],
-      default: "chat"
-    },
-
-    expiresAt: {
-      type: Date,
-      required: [true,'expiryTime is required']
+const requestSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: [true, 'Title is required'],
+    trim: true,
+    minlength: [5, 'Title must be at least 5 characters'],
+    maxlength: [200, 'Title cannot exceed 200 characters']
+  },
+  description: {
+    type: String,
+    required: [true, 'Description is required'],
+    trim: true,
+    minlength: [10, 'Description must be at least 10 characters']
+  },
+  category: {
+    type: String,
+    enum: ['Academic', 'Technical', 'General', 'Hostel', 'Campus', 'Other'],
+    default: 'General'
+  },
+  urgency: {
+    type: String,
+    enum: ['Normal', 'Urgent'],
+    default: 'Normal'
+  },
+  image: {
+    type: String,
+    default: null
+  },
+  status: {
+    type: String,
+    enum: ['Open', 'In-Progress', 'Fulfilled', 'Expired'],
+    default: 'Open'
+  },
+  requestedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  locationHint: {
+    type: String,
+    trim: true
+  },
+  contact: {
+    type: String,
+    enum: ['CHAT', 'CALL'],
+    default: 'CHAT'
+  },
+  expiresAt: {
+    type: Date,
+    default: function() {
+      // Auto expire after 2 days
+      return new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
     }
   },
-  {
-    timestamps: true
+  isRead: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
-);
+}, {
+  timestamps: true
+});
 
-//  Indexes for performance
+// Index for faster queries
+requestSchema.index({ status: 1, createdAt: -1 });
+requestSchema.index({ requestedBy: 1 });
 requestSchema.index({ category: 1 });
-requestSchema.index({ urgency: 1 });
-requestSchema.index({ status: 1 });
-requestSchema.index({ createdAt: -1 });
 
-//  Auto-expire logic helper
-requestSchema.methods.isExpired = function () {
-  return new Date() > this.expiresAt;
-};
+// Auto-expire middleware
+requestSchema.pre('find', function() {
+  // Update expired requests
+  this.where('expiresAt').lt(new Date()).where('status').ne('Expired');
+});
 
-
-requestSchema.plugin(mongooseAggregatePaginate);
-export const Request = mongoose.model("Request", requestSchema);
+export const Request = mongoose.model('Request', requestSchema);
