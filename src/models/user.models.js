@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema({
   fullName: {
@@ -29,12 +30,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Password is required'],
     minlength: [6, 'Password must be at least 6 characters'],
-    select: false // Don't return password by default
+    select: false 
   },
   branch: {
     type: String,
-    enum: ['CSE', 'ECE', 'EE', 'ME', 'CE', 'IT', 'Other'],
-    default: 'Other'
+    trim: true
   },
   year: {
     type: Number,
@@ -57,9 +57,8 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  timestamp: {
-    type: Date,
-    default: Date.now
+  lastLogin: {
+    type: Date
   }
 }, {
   timestamps: true
@@ -83,12 +82,30 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Remove sensitive data
-userSchema.methods.toJSON = function() {
-  const obj = this.toObject();
-  delete obj.password;
-  delete obj.__v;
-  return obj;
+// generate access token
+userSchema.methods.generateAccessToken = function() {
+  return jwt.sign(
+    { _id: this._id },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+  );
 };
 
-module.exports = mongoose.model('User', userSchema);
+// generate refresh token
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    { _id: this._id },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+  );
+};
+
+// Remove sensitive data
+userSchema.methods.toJSON = function() {
+  const user = this.toObject();
+  delete user.password;
+  delete user.__v;
+  return user;
+};
+
+export const User = mongoose.model("User", userSchema);
