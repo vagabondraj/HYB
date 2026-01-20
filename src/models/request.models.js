@@ -3,26 +3,26 @@ import mongoose from "mongoose";
 const requestSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: [true, 'Title is required'],
+    required: [true, "Title is required"],
     trim: true,
-    minlength: [5, 'Title must be at least 5 characters'],
-    maxlength: [200, 'Title cannot exceed 200 characters']
+    minlength: [5, "Title must be at least 5 characters"],
+    maxlength: [200, "Title cannot exceed 200 characters"]
   },
   description: {
     type: String,
-    required: [true, 'Description is required'],
+    required: [true, "Description is required"],
     trim: true,
-    minlength: [10, 'Description must be at least 10 characters']
+    minlength: [10, "Description must be at least 10 characters"]
   },
   category: {
     type: String,
-    enum: ['Academic', 'Technical', 'General', 'Hostel', 'Campus', 'Other'],
-    default: 'General'
+    enum: ["Academic", "Technical", "General", "Hostel", "Campus", "Other"],
+    default: "General"
   },
   urgency: {
     type: String,
-    enum: ['Normal', 'Urgent'],
-    default: 'Normal'
+    enum: ["Normal", "Urgent"],
+    default: "Normal"
   },
   image: {
     type: String,
@@ -30,12 +30,12 @@ const requestSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Open', 'In-Progress', 'Fulfilled', 'Expired'],
-    default: 'Open'
+    enum: ["Open", "In-Progress", "Fulfilled", "Expired"],
+    default: "Open"
   },
   requestedBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true
   },
   locationHint: {
@@ -44,8 +44,8 @@ const requestSchema = new mongoose.Schema({
   },
   contact: {
     type: String,
-    enum: ['CHAT', 'CALL'],
-    default: 'CHAT'
+    enum: ["CHAT", "CALL"],
+    default: "CHAT"
   },
   expiresAt: {
     type: Date,
@@ -57,10 +57,6 @@ const requestSchema = new mongoose.Schema({
   isRead: {
     type: Boolean,
     default: false
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
 }, {
   timestamps: true
@@ -72,9 +68,9 @@ requestSchema.index({ requestedBy: 1 });
 requestSchema.index({ category: 1 });
 
 // Auto-expire middleware
-requestSchema.pre('find', function() {
+requestSchema.pre("find", function() {
   // Update expired requests
-  this.where('expiresAt').lt(new Date()).where('status').ne('Expired');
+  this.where("expiresAt").lt(new Date()).where("status").ne("Expired");
 });
 
-export const Request = mongoose.model('Request', requestSchema);
+export const Request = mongoose.model("Request", requestSchema);
