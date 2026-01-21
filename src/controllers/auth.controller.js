@@ -2,6 +2,7 @@ import { User } from "../models/user.models.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 
 
 // helper senetize user
@@ -131,7 +132,28 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   if (year !== undefined) updates.year = year;
   if (hostel !== undefined) updates.hostel = hostel;
 
-  const user = await User.findByIdAndUpdate(
+  const user = await User.findById(req.user._id);
+
+  if(!user){
+    throw new ApiError(400, "user not found");
+  }
+
+  if(req.file){
+    const uploadedAvatar = await uploadOnCloudinary(req.file.path);
+
+    if(!uploadedAvatar?.url){
+      throw new ApiError(500, "Avatar upload failed");
+    }
+
+    if(user.avatar){
+      await deleteFromCloudinary(user.avatar);
+    }
+
+    updates.avatar = uploadedAvatar.url;
+  }
+
+
+  const updatedUser = await User.findByIdAndUpdate(
     req.user._id,
     updates,
     { new: true, runValidators: true }
