@@ -30,7 +30,7 @@ export const REPORT_STATUS = [
     "dismissed"
 ]
 
-exports.REQUEST_STATUS = [
+export const REQUEST_STATUS = [
   'open',
   'in-progress',
   'fulfilled',
