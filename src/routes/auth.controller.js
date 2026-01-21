@@ -1,0 +1,166 @@
+import { User } from "../models/user.model.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import ApiResponse from "../utils/ApiResponse.js";
+
+
+// helper senetize user
+const sanitizeUser = (user) => {
+  const userObj = user.toObject();
+  delete userObj.password;
+  delete userObj.refreshToken;
+  return userObj;
+};
+
+
+const registerUser = asyncHandler(async (req, res) => {
+  const { fullName, userName, email, password, branch, year, hostel } = req.body;
+
+  const existingUser = await User.findOne({
+    $or: [{ email }, { userName }]
+  });
+
+  if (existingUser) {
+    if (existingUser.email === email) {
+      throw new ApiError(400, "Email already registered");
+    }
+    if (existingUser.userName === userName) {
+      throw new ApiError(400, "Username already taken");
+    }
+  }
+   const user = await User.create({
+    fullName,
+    userName,
+    email,
+    password,
+    branch,
+    year,
+    hostel
+  });
+  const token = user.generateAuthToken();
+
+  res.status(201).json(
+    new ApiResponse(
+      201,
+      {
+        user: sanitizeUser(user),
+        token
+      },
+      "User registered successfully"
+    )
+  );
+});
+
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw new ApiError(400, "Please provide email and password");
+  }
+
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    throw new ApiError(401, "Invalid credentials");
+  }
+
+  const isPasswordCorrect = await user.comparePassword(password);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(401, "Invalid credentials");
+  }
+
+  if (!user.isActive) {
+    throw new ApiError(403, "Account has been deactivated");
+  }
+
+  user.lastLogin = new Date();
+  await user.save({ validateBeforeSave: false });
+
+  const token = user.generateAuthToken();
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        user: sanitizeUser(user),
+        token
+      },
+      "Login successful"
+    )
+  );
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      { user: sanitizeUser(req.user) },
+      "User retrieved successfully"
+    )
+  );
+});
+
+
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const { fullName, branch, year, hostel } = req.body;
+
+  const updates = {};
+  if (fullName !== undefined) updates.fullName = fullName;
+  if (branch !== undefined) updates.branch = branch;
+  if (year !== undefined) updates.year = year;
+  if (hostel !== undefined) updates.hostel = hostel;
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    updates,
+    { new: true, runValidators: true }
+  );
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      { user: sanitizeUser(user) },
+      "Profile updated successfully"
+    )
+  );
+});
+
+
+const changeUserPassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    throw new ApiError(400, "Please provide current and new password");
+  }
+
+  const user = await User.findById(req.user._id).select("+password");
+
+  const isPasswordCorrect = await user.comparePassword(currentPassword);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(401, "Current password is incorrect");
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  const token = user.generateAuthToken();
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      { token },
+      "Password changed successfully"
+    )
+  );
+});
+
+
+export {
+  registerUser,
+  loginUser,
+  getCurrentUser,
+  updateUserProfile,
+  changeUserPassword
+};
