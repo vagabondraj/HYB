@@ -1,0 +1,259 @@
+import { Request } from "../models/request.models.js";
+import { User } from "../models/user.models.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import ApiError from "../utils/ApiError.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { DEFAULT_PAGE_SIZE } from "../constants.js";
+
+
+const createRequest = asyncHandler(async (req, res) => {
+  const {
+    title,
+    description,
+    category,
+    urgency,
+    locationHint,
+    contact,
+    expiryDuration
+  } = req.body;
+
+  let imageUrl = null;
+
+  if (req.file?.path) {
+    const uploadResult = await uploadOnCloudinary(req.file.path);
+    imageUrl = uploadResult?.secure_url || null;
+  }
+
+  const expiresAt = new Date();
+  expiresAt.setHours(
+    expiresAt.getHours() + (Number(expiryDuration) || 24)
+  );
+
+  const request = await Request.create({
+    title,
+    description,
+    category,
+    urgency,
+    image: imageUrl,
+    locationHint,
+    contact,
+    expiresAt,
+    requestedBy: req.user._id
+  });
+
+  await request.populate("requestedBy", "fullName userName avatar");
+
+  res.status(201).json(
+    new ApiResponse(201, { request }, "Request created successfully")
+  );
+});
+
+const getAllRequests = asyncHandler(async (req, res) => {
+  const {
+    category,
+    urgency,
+    status,
+    page = 1,
+    limit = DEFAULT_PAGE_SIZE
+  } = req.query;
+
+  const query = {};
+
+  if (category) query.category = category;
+  if (urgency) query.urgency = urgency;
+
+  query.status = status
+    ? status
+    : { $in: ["open", "in-progress"] };
+
+  const skip = (page - 1) * limit;
+
+  const [requests, total] = await Promise.all([
+    Request.find(query)
+      .populate("requestedBy", "fullName userName avatar branch year")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit)),
+
+    Request.countDocuments(query)
+  ]);
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        requests,
+        pagination: {
+          total,
+          page: Number(page),
+          pages: Math.ceil(total / limit)
+        }
+      },
+      "Requests retrieved successfully"
+    )
+  );
+});
+
+const getRequestById = asyncHandler(async (req, res) => {
+  const request = await Request.findById(req.params.id)
+    .populate("requestedBy", "fullName userName avatar branch year hostel")
+    .populate("acceptedHelper", "fullName userName avatar");
+
+  if (!request) {
+    throw new ApiError(404, "Request not found");
+  }
+
+  res.status(200).json(
+    new ApiResponse(200, { request }, "Request retrieved successfully")
+  );
+});
+
+const acceptRequest = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const request = await Request.findById(id);
+
+  if (!request) {
+    throw new ApiError(404, "Request not found");
+  }
+
+  if (request.requestedBy.toString() === req.user._id.toString()) {
+    throw new ApiError(400, "You cannot accept your own request");
+  }
+
+  if (request.status !== "open") {
+    throw new ApiError(400, "Request is not open for acceptance");
+  }
+
+  request.status = "in-progress";
+  request.acceptedHelper = req.user._id;
+
+  await request.save();
+
+  res.status(200).json(
+    new ApiResponse(200, { request }, "Request accepted successfully")
+  );
+});
+
+
+const getMyRequests = asyncHandler(async (req, res) => {
+  const requests = await Request.find({
+    requestedBy: req.user._id
+  })
+    .populate("acceptedHelper", "fullName userName avatar")
+    .sort({ createdAt: -1 });
+
+  res.status(200).json(
+    new ApiResponse(200, { requests }, "Your requests retrieved successfully")
+  );
+});
+
+const updateRequest = asyncHandler(async (req, res) => {
+  const request = await Request.findById(req.params.id);
+
+  if (!request) {
+    throw new ApiError(404, "Request not found");
+  }
+
+  if (request.requestedBy.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "Not authorized to update this request");
+  }
+
+  if (["fulfilled", "cancelled"].includes(request.status)) {
+    throw new ApiError(
+      400,
+      "Cannot update fulfilled or cancelled requests"
+    );
+  }
+
+  const {
+    title,
+    description,
+    category,
+    urgency,
+    locationHint
+  } = req.body;
+
+  const updatedRequest = await Request.findByIdAndUpdate(
+    req.params.id,
+    { title, description, category, urgency, locationHint },
+    { new: true, runValidators: true }
+  ).populate("requestedBy", "fullName userName avatar");
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      { request: updatedRequest },
+      "Request updated successfully"
+    )
+  );
+});
+
+const cancelRequest = asyncHandler(async (req, res) => {
+  const request = await Request.findById(req.params.id);
+
+  if (!request) {
+    throw new ApiError(404, "Request not found");
+  }
+
+  if (request.requestedBy.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "Not authorized to cancel this request");
+  }
+
+  if (request.status === "fulfilled") {
+    throw new ApiError(400, "Cannot cancel fulfilled request");
+  }
+
+  request.status = "cancelled";
+  await request.save();
+
+  res.status(200).json(
+    new ApiResponse(200, { request }, "Request cancelled successfully")
+  );
+});
+
+const fulfillRequest = asyncHandler(async (req, res) => {
+  const request = await Request.findById(req.params.id);
+
+  if (!request) {
+    throw new ApiError(404, "Request not found");
+  }
+
+  if (request.requestedBy.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "Not authorized to fulfill this request");
+  }
+
+  if (request.status !== "in-progress") {
+    throw new ApiError(
+      400,
+      "Only in-progress requests can be fulfilled"
+    );
+  }
+
+  request.status = "fulfilled";
+  request.fulfilledAt = new Date();
+  await request.save();
+
+  if (request.acceptedHelper) {
+    await User.findByIdAndUpdate(
+      request.acceptedHelper,
+      { $inc: { helpCount: 1 } }
+    );
+  }
+
+  res.status(200).json(
+    new ApiResponse(200, { request }, "Request marked as fulfilled")
+  );
+});
+
+export {
+  createRequest,
+  getAllRequests,
+  getRequestById,
+  acceptRequest,
+  getMyRequests,
+  updateRequest,
+  cancelRequest,
+  fulfillRequest
+};

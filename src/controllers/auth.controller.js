@@ -78,22 +78,38 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Account has been deactivated");
   }
 
-  user.lastLogin = new Date();
-  await user.save({ validateBeforeSave: false });
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
 
-  const token = user.generateAccessToken();
+  user.refreshToken = refreshToken;
+  user.lastLogin = new Date();
+
+  await user.save({ validateBeforeSave: false });
 
   res.status(200).json(
     new ApiResponse(
       200,
       {
         user: sanitizeUser(user),
-        token
+        accessToken,
+        refreshToken
       },
       "Login successful"
     )
   );
 });
+
+const logoutUser = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    { $unset: { refreshToken: 1 } }
+  );
+
+  res.status(200).json(
+    new ApiResponse(200, null, "Logged out successfully")
+  );
+});
+
 
 const getCurrentUser = asyncHandler(async (req, res) => {
   res.status(200).json(
@@ -164,6 +180,7 @@ const changeUserPassword = asyncHandler(async (req, res) => {
 export {
   registerUser,
   loginUser,
+  logoutUser,
   getCurrentUser,
   updateUserProfile,
   changeUserPassword
