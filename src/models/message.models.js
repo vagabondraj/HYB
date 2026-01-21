@@ -13,13 +13,21 @@ const messageSchema = new mongoose.Schema({
     },
     constent: {
         type : String,
+        required: [true, "Message content is required"],
         required : [true, "Message content is required"],
         trim : true
     },
     image: {
         type : String,
         default: null
+    },
+    idRead: {
+        type: Boolean,
+        default: false
     }
 }, {timestamps : true});
 
+
+messageSchema.index({chat : 1, createdAt: -1});
+messageSchema.index({sender: 1});
 export const Message = mongoose.model("Message", messageSchema);

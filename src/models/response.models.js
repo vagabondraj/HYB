@@ -1,4 +1,7 @@
 import mongoose from "mongoose";
+import {
+  RESPONSE_STATUS
+} from "../constants.js";
 
 const responseSchema = new mongoose.Schema({
   request: {
@@ -19,12 +22,8 @@ const responseSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Accepted', 'Rejected'],
-    default: 'Pending'
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now
+    enum: RESPONSE_STATUS,
+    default: 'pending'
   },
   image: {
     type: String,
@@ -36,5 +35,7 @@ const responseSchema = new mongoose.Schema({
 
 // Prevent duplicate responses from same user to same request
 responseSchema.index({ request: 1, responder: 1 }, { unique: true });
+responseSchema.index({request : 1, status : 1});
+responseSchema.index({responder: 1});
 
 export const Response = mongoose.model('Response', responseSchema);

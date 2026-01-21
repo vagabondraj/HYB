@@ -23,6 +23,13 @@ export const URGENCY_LEVELS = [
     "critical"
 ];
 
+export const REPORT_STATUS = [
+    "pending",
+    "reviewed",
+    "resolved",
+    "dismissed"
+]
+
 exports.REQUEST_STATUS = [
   'open',
   'in-progress',

@@ -1,3 +1,4 @@
+import { request } from "express";
 import mongoose from "mongoose";
 
 const chatSchema = new mongoose.Schema({
@@ -11,6 +12,16 @@ const chatSchema = new mongoose.Schema({
         ref : "User",
         required: true
     }],
+    validate: {
+        validator: function (value){
+            return value.lenght === 2;
+        },
+        message : "Chat must have exactly 2 participants"
+    },
+    required: true
 }, {timestamps : true});
+
+chatSchema.index({request : 1});
+chatSchema.index({participants : 1});
 
 export const Chat = mongoose.model("Chat", chatSchema);

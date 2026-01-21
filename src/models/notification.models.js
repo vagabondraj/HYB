@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { NOTIFICATION_TYPES } from "../constants.js";
 
 const notificationSchema = new mongoose.Schema({
     uer: {
@@ -8,7 +9,7 @@ const notificationSchema = new mongoose.Schema({
     },
     type: {
         type : String,
-        enum : ['NEW_RESPONSE', 'MESSAGE', 'STATUS_UPDATE'],
+        enum : NOTIFICATION_TYPES,
         required: true
     },
     request: {
@@ -17,15 +18,12 @@ const notificationSchema = new mongoose.Schema({
     },
     message: {
         type:String,
-        required:true
+        required:true,
+        trim : true
     },
     isRead: {
         type:Boolean,
         default:false
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
     }
 }, {timestamps:true});
 
