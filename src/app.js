@@ -27,6 +27,6 @@ import authRoutes from "./routes/auth.route.js";
 
 
 //route decleration
-app.use("/api/v1/auths", authRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 export default app;

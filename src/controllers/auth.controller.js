@@ -14,6 +14,10 @@ const sanitizeUser = (user) => {
 
 
 const registerUser = asyncHandler(async (req, res) => {
+  if (!req.body) {
+    throw new ApiError(400, "Request body is missing");
+  }
+
   const { fullName, userName, email, password, branch, year, hostel } = req.body;
 
   const existingUser = await User.findOne({
@@ -37,7 +41,7 @@ const registerUser = asyncHandler(async (req, res) => {
     year,
     hostel
   });
-  const token = user.generateAuthToken();
+  const token = user.generateAccessToken();
 
   res.status(201).json(
     new ApiResponse(
@@ -77,7 +81,7 @@ const loginUser = asyncHandler(async (req, res) => {
   user.lastLogin = new Date();
   await user.save({ validateBeforeSave: false });
 
-  const token = user.generateAuthToken();
+  const token = user.generateAccessToken();
 
   res.status(200).json(
     new ApiResponse(
@@ -145,7 +149,7 @@ const changeUserPassword = asyncHandler(async (req, res) => {
   user.password = newPassword;
   await user.save();
 
-  const token = user.generateAuthToken();
+  const token = user.generateAccessToken();
 
   res.status(200).json(
     new ApiResponse(
