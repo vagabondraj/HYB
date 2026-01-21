@@ -1,5 +1,7 @@
 export const DB_NAME = "HelpYourBuddy"
 
+export const TEMP_UPLOAD_DIR = "public/temp";
+
 // request categories
 export const REQUEST_CATEGORIES = [
     "medicine",
@@ -19,6 +21,14 @@ export const URGENCY_LEVELS = [
     "normal",
     "urgent",
     "critical"
+];
+
+exports.REQUEST_STATUS = [
+  'open',
+  'in-progress',
+  'fulfilled',
+  'expired',
+  'cancelled'
 ];
 
 // request status
@@ -53,6 +63,11 @@ export const USER_ROLE = {
     ADMIN: "admin",
     MODERATOR: "moderator"
 };
+
+export const CONTACT_OPTION = [
+    "chat",
+    "call"
+];
 
 
 export const DEFAULT_PAGE_SIZE = 20;

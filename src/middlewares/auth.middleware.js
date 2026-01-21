@@ -27,7 +27,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     .select("-password -refreshToken");
 
   if (!user || !user.isActive) {
-    throw new ApiError(401, "User not found or inactive");
+    throw new ApiError(403, "User not found or inactive");
   }
 
   req.user = user;

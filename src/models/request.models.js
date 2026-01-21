@@ -1,4 +1,10 @@
 import mongoose from "mongoose";
+import {
+  REQUEST_CATEGORIES,
+  URGENCY_LEVELS,
+  REQUEST_STATUS,
+  CONTACT_OPTION
+} from "../constants.js";
 
 const requestSchema = new mongoose.Schema({
   title: {
@@ -16,13 +22,13 @@ const requestSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ["Academic", "Technical", "General", "Hostel", "Campus", "Other"],
+    enum: REQUEST_CATEGORIES,
     default: "General"
   },
   urgency: {
     type: String,
-    enum: ["Normal", "Urgent"],
-    default: "Normal"
+    enum: URGENCY_LEVELS,
+    default: "normal"
   },
   image: {
     type: String,
@@ -30,8 +36,8 @@ const requestSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Open", "In-Progress", "Fulfilled", "Expired"],
-    default: "Open"
+    enum: REQUEST_STATUS,
+    default: "open"
   },
   requestedBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -44,19 +50,25 @@ const requestSchema = new mongoose.Schema({
   },
   contact: {
     type: String,
-    enum: ["CHAT", "CALL"],
-    default: "CHAT"
+    enum: CONTACT_OPTION,
+    default: "chat"
   },
   expiresAt: {
     type: Date,
+    required : true,
     default: function() {
       // Auto expire after 2 days
       return new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
     }
   },
-  isRead: {
-    type: Boolean,
-    default: false
+  acceptedHelper: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  fulfilledAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
@@ -66,11 +78,7 @@ const requestSchema = new mongoose.Schema({
 requestSchema.index({ status: 1, createdAt: -1 });
 requestSchema.index({ requestedBy: 1 });
 requestSchema.index({ category: 1 });
+requestSchema.index({expiresAt: 1});
 
-// Auto-expire middleware
-requestSchema.pre("find", function() {
-  // Update expired requests
-  this.where("expiresAt").lt(new Date()).where("status").ne("Expired");
-});
 
 export const Request = mongoose.model("Request", requestSchema);
