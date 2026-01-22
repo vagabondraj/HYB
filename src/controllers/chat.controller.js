@@ -149,11 +149,27 @@ const getMessages = asyncHandler(async (req, res) => {
     console.log(error.message);
   }
 
+  const sanitizedMessages = messages.map(msg => {
+  if (msg.isDeleted) {
+    return {
+      _id: msg._id,
+      chat: msg.chat,
+      sender: msg.sender,
+      isDeleted: true,
+      deletedAt: msg.deletedAt,
+      createdAt: msg.createdAt
+       };
+    }
+
+    return msg;
+   });
+
+
   res.status(200).json(
     new ApiResponse(
       200,
       {
-        messages: messages.reverse(),
+        messages:sanitizedMessages.reverse(),
         pagination: {
           total,
           page,
@@ -165,9 +181,37 @@ const getMessages = asyncHandler(async (req, res) => {
   );
 });
 
+const deleteMessage = asyncHandler(async (req, res) => {
+    const { messageId} = req.params;
+    const message =await Message.findById(messageId);
+    if(!message){
+        throw new ApiError(404, "Message not found");
+    }
+
+    if (!req.user || message.sender.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You can only delete your own message");
+    }
+
+    if(message.isDeleted){
+        throw new ApiError(400, "Message already deleted");
+    }
+
+    message.isDeleted = true;
+    message.deletedAt = new Date();
+    message.content = null;
+    message.image = null;
+
+    await message.save();
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, { messageId }, "message deleted successfully"));
+});
+
 export {
     getMyChats,
     getChatById,
     sendMessage,
-    getMessages
+    getMessages,
+    deleteMessage
 }

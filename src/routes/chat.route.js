@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload, handleMulterError } from "../middlewares/multer.middleware.js";
-import { getChatById, getMessages, getMyChats, sendMessage } from "../controllers/chat.controller.js";
+import { deleteMessage, getChatById, getMessages, getMyChats, sendMessage } from "../controllers/chat.controller.js";
 
 const router = Router();
 router.use(verifyJWT);
@@ -17,5 +17,11 @@ router.post("/:id/messages",
 );
 
 router.get("/:id/messages", getMessages);
+
+router.delete(
+  "/:id/messages/:messageId",
+  verifyJWT,
+  deleteMessage
+);
 
 export default router;

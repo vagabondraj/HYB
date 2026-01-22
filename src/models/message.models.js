@@ -13,8 +13,10 @@ const messageSchema = new mongoose.Schema({
     },
     content: {
         type : String,
-        required: [true, "Message content is required"],
-        trim : true
+        trim : true,
+        required: function () {
+       return !this.isDeleted && !this.image;
+        }
     },
     image: {
         type : String,
@@ -23,6 +25,14 @@ const messageSchema = new mongoose.Schema({
     isRead: {
         type: Boolean,
         default: false
+    },
+    isDeleted:{
+        type:Boolean,
+        default:false
+    },
+    deletedAt: {
+        type:Date,
+        default:null
     }
 }, {timestamps : true});
 
