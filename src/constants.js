@@ -15,6 +15,14 @@ export const REQUEST_CATEGORIES = [
     "other"
 ];
 
+export const QUESTION_CATEGORY = [
+   "academic",
+    "technical",
+    "general",
+    "campus",
+    "other"
+];
+
 
 // urcency level
 export const URGENCY_LEVELS = [

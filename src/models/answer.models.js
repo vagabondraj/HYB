@@ -9,21 +9,41 @@ const answerSchema = mongoose.Schema({
     content: {
         type: String,
         required: [true, "Answer Content is required"],
-        trim: true
+        trim: true,
+        minlength: [2, "Answer must be at least 2 char"],
+    },
+    isAccepted: {
+      type: Boolean,
+      default: false,
     },
     answeredBy: {
         type : mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
     },
-    isPublic: {
-        type: Boolean,
-        default: true
-    },
-    createdAt: {
-        type: Date,
-        default : Date.now
-    }
+    upvotes: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
+    ],
+    downvotes: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref:"User",
+        },
+    ],
+    
+}, {timestamps : true});
+
+// vote cnt
+answerSchema.virtual("voteCount").get(function () {
+  return this.upvotes.length - this.downvotes.length;
 });
+
+answerSchema.index({question:1, createdAt: -1});
+answerSchema.index({answeredBy: 1});
+answerSchema.set("toJSON", { virtuals: true });
+answerSchema.set("toObject", { virtuals: true });
 
 export const Answer = mongoose.model("Answer", answerSchema);
