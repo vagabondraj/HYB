@@ -9,7 +9,9 @@ import { uploadOnCloudinary }from '../utils/cloudinary.js';
 
 
 const isParticipant = (chat, userId) => 
-    chat.participants.some(p=>p.toString() === userId);
+    chat.participants.some(p => (
+        p._id?p._id.toString():p.toString()) === userId.toString()
+    );
 
 const getMyChats = asyncHandler(async (req, res) => {
   const chats = await Chat.find({ participants: req.user.id })

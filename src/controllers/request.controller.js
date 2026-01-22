@@ -1,5 +1,6 @@
 import { Request } from "../models/request.models.js";
 import { User } from "../models/user.models.js";
+import {Chat} from "../models/chat.models.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
@@ -131,8 +132,21 @@ const acceptRequest = asyncHandler(async (req, res) => {
 
   await request.save();
 
+  let chat = await Chat.findOne({ request: request._id });
+
+  if (!chat) {
+  chat = await Chat.create({
+    request: request._id,
+    participants: [
+      request.requestedBy,
+      req.user._id
+    ]
+  });
+ }
+
+
   res.status(200).json(
-    new ApiResponse(200, { request }, "Request accepted successfully")
+    new ApiResponse(200, { request, chat }, "Request accepted successfully")
   );
 });
 

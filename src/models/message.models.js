@@ -11,17 +11,16 @@ const messageSchema = new mongoose.Schema({
         ref : "User",
         required : true
     },
-    constent: {
+    content: {
         type : String,
         required: [true, "Message content is required"],
-        required : [true, "Message content is required"],
         trim : true
     },
     image: {
         type : String,
         default: null
     },
-    idRead: {
+    isRead: {
         type: Boolean,
         default: false
     }
