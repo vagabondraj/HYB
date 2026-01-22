@@ -24,10 +24,12 @@ app.use(cookieParser());
 // import routes
 import authRoutes from "./routes/auth.route.js";
 import reqRoutes from "./routes/request.route.js";
+import resRouter from "./routes/response.route.js";
 
 
 //route decleration
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/req", reqRoutes);
+app.use("api/v1/req", resRouter);
 
 export default app;

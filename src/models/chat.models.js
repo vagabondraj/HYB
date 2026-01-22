@@ -1,4 +1,3 @@
-import { request } from "express";
 import mongoose from "mongoose";
 
 const chatSchema = new mongoose.Schema({
@@ -7,18 +6,21 @@ const chatSchema = new mongoose.Schema({
         ref : "Request",
         required : true
     },
-    participants : [{
-        type : mongoose.Schema.Types.ObjectId,
-        ref : "User",
-        required: true
-    }],
-    validate: {
-        validator: function (value){
-            return value.lenght === 2;
-        },
-        message : "Chat must have exactly 2 participants"
-    },
-    required: true
+    participants : {
+        type: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User",
+                required: true
+            }
+        ],
+        validate: {
+            validator: function(value){
+                return value.lenght=== 2;
+            },
+            message:"Chat must have exactly 2 participants"
+        }
+    }
 }, {timestamps : true});
 
 chatSchema.index({request : 1});
