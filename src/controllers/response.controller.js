@@ -93,6 +93,10 @@ const getResponsesForRequest = asyncHandler(async (req, res) => {
 });
 
 const getMyResponses = asyncHandler(async (req, res) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
   const responses = await Response.find({ responder: req.user._id })
     .populate({
       path: "request",
@@ -101,10 +105,28 @@ const getMyResponses = asyncHandler(async (req, res) => {
         select: "fullName userName avatar"
       }
     })
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
 
-  res.status(200).json(
-    new ApiResponse(200, { responses }, "Your responses retrieved successfully")
+  const totalResponses = await Response.countDocuments({
+    responder: req.user._id
+  });
+
+   res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        responses,
+        pagination: {
+          total: totalResponses,
+          page,
+          limit,
+          totalPages: Math.ceil(totalResponses / limit)
+        }
+      },
+      "Your responses retrieved successfully"
+    )
   );
 });
 
@@ -123,6 +145,10 @@ const acceptResponse = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Not authorized to accept this response");
   }
 
+  if (request.acceptedHelper) {
+    throw new ApiError(400, "A helper has already been accepted");
+  }
+
   if (request.status !== "open") {
     throw new ApiError(400, "This request is no longer open");
   }
@@ -139,24 +165,35 @@ const acceptResponse = asyncHandler(async (req, res) => {
     { status: "rejected" }
   );
 
+  const ownerId = request.requestedBy.toString();
+  const helperId = response.responder.toString();
+
+  if (ownerId === helperId) {
+    throw new ApiError(400, "Invalid chat participants");
+  }
+
   const chatExists = await Chat.findOne({
     request: request._id,
-    participants: { $all: [req.user._id, response.responder] }
+    participants: { $all: [ownerId, response.responder] }
   });
 
   if (!chatExists) {
     await Chat.create({
       request: request._id,
-      participants: [req.user._id, response.responder]
+      participants: [ownerId, response.responder]
     });
   }
 
-  await Notification.create({
-    user: response.responder,
-    type: "response_accepted",
-    request: request._id,
-    message: `Your help offer was accepted by ${req.user.fullName}`
-  });
+  try {
+    await Notification.create({
+      user: response.responder,
+      type: "response_accepted",
+      request: request._id,
+      message: `Your help offer was accepted by ${req.user.fullName}`
+    });
+  } catch (error) {
+    console.error("Notification error:", error.message);
+  }
 
   res.status(200).json(
     new ApiResponse(200, { response }, "Response accepted successfully")
