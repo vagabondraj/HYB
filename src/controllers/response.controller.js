@@ -215,15 +215,29 @@ const rejectResponse = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Not authorized to reject this response");
   }
 
+
+  if (response.status === "accepted") {
+    throw new ApiError(400, "Cannot reject an accepted response");
+  }
+
+  if (response.status === "rejected") {
+    return res.status(200).json(
+      new ApiResponse(200, { response }, "Response already rejected")
+    );
+  } 
   response.status = "rejected";
   await response.save();
 
-  await Notification.create({
-    user: response.responder,
-    type: "response_rejected",
-    request: request._id,
-    message: "Your help offer was declined"
-  });
+  try {
+    await Notification.create({
+      user: response.responder,
+      type: "response_rejected",
+      request: request._id,
+      message: "Your help offer was declined"
+    });
+  } catch (error) {
+     console.log("Notification error:", error.message);
+  }
 
   res.status(200).json(
     new ApiResponse(200, { response }, "Response rejected successfully")
