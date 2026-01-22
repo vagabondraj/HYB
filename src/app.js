@@ -30,6 +30,6 @@ import resRouter from "./routes/response.route.js";
 //route decleration
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/req", reqRoutes);
-app.use("api/v1/req", resRouter);
+app.use("/api/v1/res", resRouter);
 
 export default app;

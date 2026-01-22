@@ -51,7 +51,7 @@ export const NOTIFICATION_TYPES = [
     "new_response",
     "response_accepted",
     "response_rejected",
-    "reuest_fullfilled",
+    "request_fullfilled",
     "new_message",
     "system"
 ];

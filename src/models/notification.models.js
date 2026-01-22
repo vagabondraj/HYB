@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { NOTIFICATION_TYPES } from "../constants.js";
 
 const notificationSchema = new mongoose.Schema({
-    uer: {
+    user: {
         type : mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true

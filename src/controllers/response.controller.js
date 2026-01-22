@@ -20,12 +20,12 @@ const createResponse = asyncHandler(async (req, res) => {
     if(request.requestedBy.toString() === req.user._id.toString()){
         throw new ApiError(400, "can't repond toyour own request");
     }
-    if(request.status !== "open"){
-        throw new ApiResponse(400, "can't respond to this request");
-    }
+    if (request.status !== "open") {
+      throw new ApiError(400, "Can't respond to this request");
+  }
 
     const alreadyResponded = await Response.findOne({
-        request: requestId,
+        request: request._id,
         responder:req.user._id
     });
 
@@ -43,7 +43,7 @@ const createResponse = asyncHandler(async (req, res) => {
     }
 
     const response = await Response.create({
-        request:requestId,
+        request:request._id,
         responder:req.user._id,
         message,
         image
@@ -51,16 +51,24 @@ const createResponse = asyncHandler(async (req, res) => {
 
     await response.populate("responder", "fullName userName avatar");
     
-    await Notification.create({
-        user: request.requestedBy,
-        type: "new_requestedBy",
-        request: requestId,
-        message: `${req.user.fullNmae} want to help with your request`
-    });
+    try {
+      await Notification.create({
+          user: request.requestedBy,
+          type: "new_response",
+          request: request._id,
+          message: `${req.user.fullName} want to help with your request`
+      });
+    } catch (error) {
+      console.log("Notification error", error.message);
+    }
 
     return res
     .status(201)
-    .json(201,{response}, "Response submitted successfully");
+    .json({
+      success:true,
+      message: "Response created succesfully",
+      data: response
+    });
 });
 
 const getResponsesForRequest = asyncHandler(async (req, res) => {

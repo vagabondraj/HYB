@@ -18,9 +18,9 @@ router.post("/create-response",
     createResponse
 );
 
-router.get("get-my-res", getMyResponses);
+router.get("/get-my-res", getMyResponses);
 
-router.get("/get-req-for-res/:req_id", getResponsesForRequest);
+router.get("/get-req-for-res/:requestId", getResponsesForRequest);
 
 router.patch("/:id/accept", acceptResponse);
 
