@@ -25,11 +25,13 @@ app.use(cookieParser());
 import authRoutes from "./routes/auth.route.js";
 import reqRoutes from "./routes/request.route.js";
 import resRouter from "./routes/response.route.js";
+import chatRouter from "./routes/chat.route.js";
 
 
 //route decleration
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/req", reqRoutes);
 app.use("/api/v1/res", resRouter);
+app.use("/api/v1/chat", chatRouter);
 
 export default app;
