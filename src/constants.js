@@ -2,6 +2,8 @@ export const DB_NAME = "HelpYourBuddy"
 
 export const TEMP_UPLOAD_DIR = "public/temp";
 
+export const DELETE_WINDOW_MINUTES = 5;
+
 // request categories
 export const REQUEST_CATEGORIES = [
     "medicine",

@@ -7,7 +7,8 @@ import {
   getMyRequests,
   updateRequest,
   cancelRequest,
-  fulfillRequest
+  fulfillRequest,
+  deleteRequest
 } from "../controllers/request.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload, handleMulterError } from "../middlewares/multer.middleware.js";
@@ -25,5 +26,6 @@ router.put("/accept-req/:id", verifyJWT, acceptRequest);
 router.put("/update-req/:id", verifyJWT, updateRequest);
 router.put("/cancle-req/:id", verifyJWT, cancelRequest);
 router.put("/full-fill-req/:id", verifyJWT, fulfillRequest);
+router.delete("/:id", verifyJWT, deleteRequest);
 
 export default router;

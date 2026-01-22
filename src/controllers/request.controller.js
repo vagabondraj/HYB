@@ -5,7 +5,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { DEFAULT_PAGE_SIZE } from "../constants.js";
+import { DEFAULT_PAGE_SIZE, DELETE_WINDOW_MINUTES } from "../constants.js";
 
 
 const createRequest = asyncHandler(async (req, res) => {
@@ -261,6 +261,40 @@ const fulfillRequest = asyncHandler(async (req, res) => {
   );
 });
 
+const deleteRequest = asyncHandler(async(req, res) => {
+  const request = await Request.findById(req.params.id);
+  if(!request){
+    throw new ApiError(404,"Request not found");
+    }
+
+    if(request.requestedBy.toString() !== req.user._id.toString()){
+      throw new ApiError(403, "Not authorized to update this request");
+    }
+
+    if(request.status !== "open"){
+      throw new ApiError(400, "Only open request can be deleted");
+    }
+
+    const createdAt = new Date(request.createdAt);
+    const now = new Date();
+    const diffMinutes = (now-createdAt)/(1000*60);
+    if(diffMinutes > DELETE_WINDOW_MINUTES){
+      throw new ApiError(400, "request can only be deleted within 5 min of creation");
+    }
+
+    const chatExists = await Chat.exists({request:request._id});
+
+    if(chatExists){
+      throw new ApiError(400, "you can't delete chat has been created");
+    }
+
+    await Request.deleteOne({_id:request._id});
+    
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Request deleted successfully"));
+});
+
 export {
   createRequest,
   getAllRequests,
@@ -269,5 +303,6 @@ export {
   getMyRequests,
   updateRequest,
   cancelRequest,
-  fulfillRequest
+  fulfillRequest,
+  deleteRequest
 };
