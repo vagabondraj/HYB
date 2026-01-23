@@ -72,6 +72,7 @@ export const REPORT_REASON = [
     "inappropriate_content",
     "fraud",
     "fake_request",
+    "abuse",
     "other"
 ];
 

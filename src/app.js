@@ -27,6 +27,7 @@ import reqRoutes from "./routes/request.route.js";
 import resRouter from "./routes/response.route.js";
 import chatRouter from "./routes/chat.route.js";
 import notificationRouter from "./routes/notification.route.js";
+import reportRouter from "./routes/report.route.js";
 
 
 //route decleration
@@ -34,6 +35,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/req", reqRoutes);
 app.use("/api/v1/res", resRouter);
 app.use("/api/v1/chat", chatRouter);
-app.use("api/v1/notification", notificationRouter);
+app.use("/api/v1/notification", notificationRouter);
+app.use("/api/v1/report", reportRouter);
 
 export default app;

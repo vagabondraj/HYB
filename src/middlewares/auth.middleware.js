@@ -63,3 +63,18 @@ export const optionalAuth = asyncHandler(async (req, res, next) => {
 
   next();
 });
+
+
+export const authorize = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      throw new ApiError(401, "Unauthorized request");
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      throw new ApiError(403, "You are not allowed to access this resource");
+    }
+
+    next();
+  };
+};
