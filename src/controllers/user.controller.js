@@ -9,7 +9,9 @@ import {  uploadOnCloudinary } from '../utils/cloudinary.js';
 const getUserProfile = asyncHandler(async (req, res, next) =>{
     const {userName} = req.params;
     
-    const user = await User.findOne({userName});
+    const user = await User.findOne({userName}).select(
+        "_id fullName userName avatar branch year hostel helpCount"
+    );
     if(!user){
         return next(new ApiError(404, "User not found"));
     }
@@ -44,7 +46,9 @@ const uploadAvatar = asyncHandler(async (req, res, next) => {
     const user = await User.findByIdAndUpdate(
         req.user.id,
         {avatar: uploaded.url},
-        {new: true}
+        {new: true,
+            select:"fullName userName avatar"
+        }
     );
     if(!user){
         return next(new ApiError(404, "User not found"));

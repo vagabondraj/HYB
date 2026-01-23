@@ -6,7 +6,7 @@ import { getUserProfile, searchUsers, uploadAvatar } from "../controllers/user.c
 const router = Router();
 
 router.get("/search", searchUsers);
-router.get("/profile/:username", getUserProfile);
+router.get("/profile/:userName", getUserProfile);
 router.put("/avatar", verifyJWT, upload.single("avatar"), handleMulterError, uploadAvatar);
 
 export default router;
