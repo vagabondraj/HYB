@@ -33,14 +33,17 @@ const registerUser = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Username already taken");
     }
   }
-   const user = await User.create({
+
+  const userCount = await User.countDocuments();
+  const user = await User.create({
     fullName,
     userName,
     email,
     password,
     branch,
     year,
-    hostel
+    hostel,
+    role:usersCount === 0 ? "admin" : "user"
   });
   const token = user.generateAccessToken();
 

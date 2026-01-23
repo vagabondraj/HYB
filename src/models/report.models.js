@@ -38,7 +38,7 @@ const reportSchema = mongoose.Schema({
         type: String,
         trim:true
     },
-    rewiesedAt: {
+    reviewedAt: {
         type: Date,
         default:null
     }
