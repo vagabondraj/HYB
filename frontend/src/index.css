@@ -3,8 +3,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@reference utilities;
 
-@layer base {
+/* @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
     scroll-behavior: smooth;
@@ -21,11 +22,11 @@
   *::after {
     @apply transition-colors duration-200;
   }
-}
+} */
 
 
-@layer components {
-  /* Buttons */
+/* @layer components {
+  
   .btn {
     @apply inline-flex items-center justify-center gap-2
            px-6 py-3 rounded-xl font-medium
@@ -51,7 +52,7 @@
            hover:bg-neutral-100 dark:hover:bg-neutral-800;
   }
 
-  /* Inputs */
+ 
   .input {
     @apply w-full px-4 py-3 rounded-xl
            border border-neutral-300 dark:border-neutral-600
@@ -67,7 +68,7 @@
     @apply input resize-none;
   }
 
-  /* Cards */
+ 
   .card {
     @apply bg-white dark:bg-neutral-800
            rounded-2xl
@@ -76,7 +77,7 @@
            transition-shadow duration-200;
   }
 
-  /* Badges */
+  
   .badge {
     @apply inline-flex items-center
            px-3 py-1 rounded-full
@@ -98,7 +99,7 @@
            text-blue-700 dark:text-blue-300;
   }
 
-  /* Scrollbar */
+  
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -107,9 +108,9 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-}
+} */
 
-@keyframes slide-in {
+/* @keyframes slide-in {
   from {
     opacity: 0;
     transform: translateY(12px);
@@ -118,8 +119,8 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
+} */
 
-.animate-slide-in {
+/* .animate-slide-in {
   animation: slide-in 0.3s ease-out both;
-}
+} */

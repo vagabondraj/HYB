@@ -1,40 +1,40 @@
 import axios from "./axios";
-import { API_ROUTES } from "../utils/constants";
+import { API_ROUTE } from "../utils/constants";
 
 const authAPI = {
   register(userData) {
     return axios
-      .post(API_ROUTES.AUTH.REGISTER, userData)
+      .post(API_ROUTE.AUTH.REGISTER, userData)
       .then(res => res.data);
   },
 
   login(email, password) {
     return axios
-      .post(API_ROUTES.AUTH.LOGIN, { email, password })
+      .post(API_ROUTE.AUTH.LOGIN, { email, password })
       .then(res => res.data);
   },
 
   logout() {
     return axios
-      .post(API_ROUTES.AUTH.LOGOUT)
+      .post(API_ROUTE.AUTH.LOGOUT)
       .then(res => res.data);
   },
 
   getMe() {
     return axios
-      .get(API_ROUTES.AUTH.ME)
+      .get(API_ROUTE.AUTH.ME)
       .then(res => res.data);
   },
 
   updateProfile(data) {
     return axios
-      .put(API_ROUTES.AUTH.UPDATE_PROFILE, data)
+      .put(API_ROUTE.AUTH.UPDATE_PROFILE, data)
       .then(res => res.data);
   },
 
   changePassword(currentPassword, newPassword) {
     return axios
-      .put(API_ROUTES.AUTH.CHANGE_PASSWORD, {
+      .put(API_ROUTE.AUTH.CHANGE_PASSWORD, {
         currentPassword,
         newPassword,
       })

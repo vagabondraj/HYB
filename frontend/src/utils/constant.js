@@ -129,7 +129,7 @@ export const MAX_DESCRIPTION_LENGTH = 1000;
 
 // src/utils/constants.js
 
-export const API_ROUTES = {
+export const API_ROUTE = {
   AUTH: {
     REGISTER: "/auth/register",
     LOGIN: "/auth/login",
@@ -138,5 +138,58 @@ export const API_ROUTES = {
     UPDATE_PROFILE: "/auth/update-profile",
     CHANGE_PASSWORD: "/auth/change-password",
   },
+
+  USER: {
+    SEARCH: "/user/search",
+    PROFILE: (userName) => `/user/profile/${userName}`,
+    UPLOAD_AVATAR: "/user/avatar",
+  },
+
+  CHAT: {
+    GET_MY_CHATS: "/chat",
+    GET_CHAT_BY_ID: (chatId) => `/chat/${chatId}`,
+    GET_MESSAGES: (chatId) => `/chat/${chatId}/messages`,
+    SEND_MESSAGE: (chatId) => `/chat/${chatId}/messages`,
+    DELETE_MESSAGE: (chatId, messageId) =>
+      `/chat/${chatId}/messages/${messageId}`,
+  },
+
+  NOTIFICATIONS: {
+    GET_MY: "/notifications",
+    MARK_AS_READ: (notificationId) =>
+      `/notifications/${notificationId}/read`,
+    MARK_ALL_AS_READ: "/notifications/read-all",
+    DELETE: (notificationId) =>
+      `/notifications/${notificationId}`,
+  },
+
+   REQUESTS: {
+    CREATE: "/requests/create-req",
+    GET_ALL: "/requests/get-all-req",
+    GET_BY_ID: (id) => `/requests/get-req-ById/${id}`,
+
+    GET_MY: "/requests/get-my-req",
+    ACCEPT: (id) => `/requests/accept-req/${id}`,
+    UPDATE: (id) => `/requests/update-req/${id}`,
+    CANCEL: (id) => `/requests/cancle-req/${id}`,
+    FULFILL: (id) => `/requests/full-fill-req/${id}`,
+    DELETE: (id) => `/requests/${id}`,
+  },
+
+  RESPONSES: {
+    CREATE: "/responses/create-response",
+    GET_MY: "/responses/get-my-res",
+    GET_FOR_REQUEST: (requestId) =>
+      `/responses/get-req-for-res/${requestId}`,
+    ACCEPT: (id) => `/responses/${id}/accept`,
+    REJECT: (id) => `/responses/${id}/reject`,
+  },
+
+  REPORTS: {
+    CREATE: "/reports",
+    GET_ALL: "/reports",
+    UPDATE: (id) => `/reports/${id}`,
+  },
 };
+
 
