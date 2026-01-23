@@ -126,3 +126,17 @@ export const ALLOWED_IMAGE_TYPES = [
 export const MAX_CHAT_LENGTH = 1000;
 export const MAX_TITLE_LENGTH = 100;
 export const MAX_DESCRIPTION_LENGTH = 1000;
+
+// src/utils/constants.js
+
+export const API_ROUTES = {
+  AUTH: {
+    REGISTER: "/auth/register",
+    LOGIN: "/auth/login",
+    LOGOUT: "/auth/logout",
+    ME: "/auth/me",
+    UPDATE_PROFILE: "/auth/update-profile",
+    CHANGE_PASSWORD: "/auth/change-password",
+  },
+};
+
