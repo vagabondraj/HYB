@@ -165,7 +165,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   res.status(200).json(
     new ApiResponse(
       200,
-      { user: sanitizeUser(user) },
+      { user: sanitizeUser(updatedUser) },
       "Profile updated successfully"
     )
   );

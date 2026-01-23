@@ -1,0 +1,83 @@
+import {User} from '../models/user.models.js';
+import {Request} from '../models/request.models.js';
+import {Response} from '../models/response.models.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
+import {  uploadOnCloudinary } from '../utils/cloudinary.js';
+
+const getUserProfile = asyncHandler(async (req, res, next) =>{
+    const {userName} = req.params;
+    
+    const user = await User.findOne({userName});
+    if(!user){
+        return next(new ApiError(404, "User not found"));
+    }
+
+    const [requestsCreated, responsesGiven] = await Promise.all([
+        Request.countDocuments({requestedBy: user._id}),
+        Response.countDocuments({responder: user._id})
+    ]);
+
+    const userProfile ={...user.toObject(),
+        stats: {
+            requestsCreated,
+            responsesGiven,
+            helpCount:user.helpCount
+        }
+    };
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {user: userProfile}, "user profile retrieved successfully"));
+});
+
+const uploadAvatar = asyncHandler(async (req, res, next) => {
+    if(!req.file){
+        return next(new ApiError(400, "please upload an image"));
+    }
+
+    const uploaded= await uploadOnCloudinary(req.file.path);
+    if(!uploaded?.url){
+        return next(new ApiError(500, "Avatar upload failed"));
+    }
+    const user = await User.findByIdAndUpdate(
+        req.user.id,
+        {avatar: uploaded.url},
+        {new: true}
+    );
+    if(!user){
+        return next(new ApiError(404, "User not found"));
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {user}, "Avatar uploaded successfully"));
+});
+
+const searchUsers = asyncHandler(async (req, res, next) =>{
+    const {q, limit =10} =req.query;
+
+    if(!q || q.trim().length < 2){
+        return next(new ApiError(400,"search query must be atleast 2 char"));
+    }
+
+    const users = await User.find({
+        isActive: true,
+        $or:[
+            {userName: {$regex: q, $options: 'i'}},
+            {fullName:{$regex:q, $options:'i'}}
+        ]
+    }).select("fullName userName avatar branch year helpCount")
+      .limit(Number(limit));
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, { users }, "user found successfully"));
+});
+
+export{
+    getUserProfile,
+    uploadAvatar,
+    searchUsers
+}

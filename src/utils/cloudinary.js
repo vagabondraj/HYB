@@ -42,6 +42,6 @@ const deleteFromCloudinary = async(imageUrl) => {
     }catch(error){
         console.log("Cloudinary upload error:",error.message);
     }
-}
+};
 
 export {uploadOnCloudinary, deleteFromCloudinary};
