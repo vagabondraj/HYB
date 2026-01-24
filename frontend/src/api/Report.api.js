@@ -1,5 +1,5 @@
-import axios from "./axios";
-import { API_ROUTE } from "../utils/constants.js";
+import axios from "./axios.api.js";
+import { API_ROUTE } from "../utils/constant.js";
 
 export const reportAPI = {
   /**
