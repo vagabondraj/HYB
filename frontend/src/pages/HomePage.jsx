@@ -61,7 +61,7 @@ const HomePage = () => {
 
       <main className="mx-auto max-w-6xl px-6 py-8">
         {/* Welcome Banner */}
-        <div className="mb-10 rounded-3xl bg-gradient-to-r from-primary-500 via-primary-600 to-accent-500 p-10 text-white shadow-xl">
+        <div className="mb-10 rounded-3xl bg-linear-to-r from-primary-500 via-primary-600 to-accent-500 p-10 text-white shadow-xl">
           <h2 className="mb-3 text-4xl font-bold">
             Welcome back, {user?.fullName || "Buddy"} 👋
           </h2>
