@@ -1,9 +1,10 @@
 import useToast from '../hooks/useToast';
-import Toast from '../components/Toast';
+import Toast from '../components/Toast.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 
 function LoginPage() {
   const { toast, showToast, hideToast } = useToast();
-
+  const {login} = useAuth();
   const handleLogin = async () => {
     try {
       await login();
@@ -26,3 +27,5 @@ function LoginPage() {
     </>
   );
 }
+
+export default LoginPage;
