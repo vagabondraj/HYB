@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
 import { Clock, Trash2, Heart } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
-import CategoryBadge from "./CategoryBadge.js";
-import UrgencyBadge from "./UrgencyBadge.js";
-import ConfirmDialog from "./ConfirmDialog.js";
+import CategoryBadge from "./CategoryBadge.jsx";
+import UrgencyBadge from "./UrgencyBadge.jsx";
+import ConfirmDialog from "./ConfirmDialog.jsx";
+import { WINDOW_EXPIRY_TIME } from "../utils/constant.js";
 
-const WINDOW_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes (must match backend)
 
 const timeAgo = (date) => {
   const seconds = Math.floor((Date.now() - new Date(date)) / 1000);

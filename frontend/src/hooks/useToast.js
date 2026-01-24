@@ -1,31 +1,28 @@
-import useToast from '../hooks/useToast';
-import Toast from '../components/Toast.jsx';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useState, useCallback } from "react";
 
-function LoginPage() {
-  const { toast, showToast, hideToast } = useToast();
-  const {login} = useAuth();
-  const handleLogin = async () => {
-    try {
-      await login();
-      showToast('Login successful');
-    } catch (err) {
-      showToast('Invalid credentials', 'error');
-    }
-  };
+const useToast = () => {
+  const [toast, setToast] = useState(null);
 
-  return (
-    <>
-      <button onClick={handleLogin}>Login</button>
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={hideToast}
-        />
-      )}
-    </>
+  const showToast = useCallback(
+    (message, type = "success", duration = 3000) => {
+      setToast({ message, type });
+
+      setTimeout(() => {
+        setToast(null);
+      }, duration);
+    },
+    []
   );
-}
 
-export default LoginPage;
+  const hideToast = useCallback(() => {
+    setToast(null);
+  }, []);
+
+  return {
+    toast,
+    showToast,
+    hideToast,
+  };
+};
+
+export default useToast;
