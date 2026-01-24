@@ -1,5 +1,5 @@
-import axios from "./axios.api";
-import {API_ROUTE} from "../utils/constant";
+import axios from "./axios.api.js";
+import {API_ROUTE} from "../utils/constant.js";
 
 const notificationAPI = {
     getAll :async (page=1, limit=20)=>{

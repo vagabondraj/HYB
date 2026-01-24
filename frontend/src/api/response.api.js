@@ -1,5 +1,5 @@
-import axios from './axios';
-import { API_ROUTE } from '../utils/constant';
+import axios from './axios.js';
+import { API_ROUTE } from '../utils/constant.js';
 
 const responsesAPI = {
   // Create response 
