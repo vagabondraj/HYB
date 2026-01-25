@@ -43,7 +43,7 @@ const registerUser = asyncHandler(async (req, res) => {
     branch,
     year,
     hostel,
-    role:usersCount === 0 ? "admin" : "user"
+    role:userCount === 0 ? "admin" : "user"
   });
   const token = user.generateAccessToken();
 
