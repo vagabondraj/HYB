@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, Loader2, Mail, Lock, User, Building, Calendar, Home, Heart, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Eye, EyeOff, Loader2, Mail, Lock, User, Building, Calendar, Home, Heart, CheckCircle, Camera } from 'lucide-react';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -26,6 +27,8 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -80,27 +83,45 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
-    
-    setIsLoading(true);
-    const result = await register({
-      fullName: formData.fullName,
-      userName: formData.userName.toLowerCase(),
-      email: formData.email.toLowerCase(),
-      password: formData.password,
-      branch: formData.branch || undefined,
-      year: formData.year ? Number(formData.year) : undefined,
-      hostel: formData.hostel || undefined,
-    });
-    setIsLoading(false);
-    
-    if (result.success) {
-      navigate('/dashboard');
+const handleAvatarChange = (e) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, avatar: 'Image must be less than 5MB' }));
+      return;
     }
-  };
+    setAvatarFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!validateForm()) return;
+
+  setIsLoading(true);
+  const result = await register({
+    fullName: formData.fullName,
+    userName: formData.userName.toLowerCase(),
+    email: formData.email.toLowerCase(),
+    password: formData.password,
+    branch: formData.branch || undefined,
+    year: formData.year ? Number(formData.year) : undefined,
+    hostel: formData.hostel || undefined,
+    avatar: avatarFile || undefined, // Add avatar file
+  });
+  setIsLoading(false);
+
+  if (result.success) {
+    navigate('/dashboard');
+  }
+};
 
   const features = [
     'Request help from your community',
@@ -190,6 +211,36 @@ const Register = () => {
               <CardDescription>
                 Enter your details to get started
               </CardDescription>
+               {/* Avatar Upload */}
+              <div className="flex justify-center mb-4">
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-border">
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-8 h-8 text-muted-foreground" />
+                    )}
+                  </div>
+                  <label
+                    htmlFor="avatar-upload"
+                    className="absolute bottom-0 right-0 p-1.5 bg-primary text-primary-foreground rounded-full cursor-pointer hover:bg-primary/90 transition-colors"
+                  >
+                    <Camera className="w-3 h-3" />
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarChange}
+                      disabled={isLoading}
+                    />
+                  </label>
+                </div>
+              </div>
+              {errors.avatar && (
+                <p className="text-xs text-destructive text-center mb-2">{errors.avatar}</p>
+              )}
+
             </CardHeader>
             
             <form onSubmit={handleSubmit}>
