@@ -16,7 +16,7 @@ const sanitizeUser = (user) => {
 
 const registerUser = asyncHandler(async (req, res) => {
   if (!req.body) {
-    throw new ApiError(400, "Request body is missing");
+  throw new ApiError(400, "Request body is missing");
   }
 
   const { fullName, userName, email, password, branch, year, hostel } = req.body;
@@ -45,14 +45,14 @@ const registerUser = asyncHandler(async (req, res) => {
     hostel,
     role:userCount === 0 ? "admin" : "user"
   });
-  const token = user.generateAccessToken();
+  const accessToken = user.generateAccessToken();
 
   res.status(201).json(
     new ApiResponse(
       201,
       {
         user: sanitizeUser(user),
-        token
+        accessToken
       },
       "User registered successfully"
     )

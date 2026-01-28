@@ -78,10 +78,11 @@ export const AuthProvider = ({ children }) => {
       toast.success('Account created successfully! 🎉');
       return { success: true, user: newUser };
     } catch (error) {
-      const message = error.response?.data?.message || 'Registration failed';
+      const message = error.message || 'Registration failed';
       toast.error(message);
       return { success: false, error: message };
     }
+
   }, []);
 
   // 🔑 Login
@@ -172,4 +173,3 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export default AuthContext;

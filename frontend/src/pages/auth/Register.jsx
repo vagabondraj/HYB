@@ -116,16 +116,19 @@ const handleSubmit = async (e) => {
   if (!validateForm()) return;
 
   setIsLoading(true);
-  const result = await register({
-    fullName: formData.fullName,
-    userName: formData.userName.toLowerCase(),
-    email: formData.email.toLowerCase(),
-    password: formData.password,
-    branch: formData.branch || undefined,
-    year: formData.year ? Number(formData.year) : undefined,
-    hostel: formData.hostel || undefined,
-    avatar: avatarFile || undefined, // Add avatar file
-  });
+  const payload = {
+  fullName: formData.fullName,
+  userName: formData.userName.toLowerCase(),
+  email: formData.email.toLowerCase(),
+  password: formData.password,
+  branch: formData.branch || undefined,
+  year: formData.year ? Number(formData.year) : undefined,
+  hostel: formData.hostel || undefined,
+  ...(avatarFile && { avatar: avatarFile }),
+  };
+
+const result = await register(payload);
+
   setIsLoading(false);
 
   if (result.success) {

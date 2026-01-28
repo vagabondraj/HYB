@@ -27,7 +27,7 @@ const ChatRoom = () => {
   useEffect(() => {
     const fetchChatInfo = async () => {
       try {
-        const response = await api.get(`/chats/${chatId}`);
+        const response = await api.get(`/chat/${chatId}`);
         setChatInfo(response.data.data.chat);
       } catch (err) {
         console.error('Failed to fetch chat info:', err);

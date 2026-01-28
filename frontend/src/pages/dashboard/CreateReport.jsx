@@ -47,7 +47,7 @@ const CreateReport = () => {
 
     setIsSubmitting(true);
     try {
-      await api.post('/reports', formData);
+      await api.post('/report', formData);
       toast.success('Report submitted successfully');
       navigate(-1);
     } catch (err) {

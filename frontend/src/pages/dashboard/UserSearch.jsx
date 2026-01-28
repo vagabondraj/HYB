@@ -24,7 +24,7 @@ const UserSearch = () => {
 
     setIsLoading(true);
     try {
-      const response = await api.get(`/users/search?q=${encodeURIComponent(searchQuery)}`);
+      const response = await api.get(`/user/search?q=${encodeURIComponent(searchQuery)}`);
       setUsers(response.data.data.users || []);
       setHasSearched(true);
     } catch (err) {

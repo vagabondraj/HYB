@@ -20,7 +20,7 @@ const UserProfile = () => {
     const fetchProfile = async () => {
       try {
         setIsLoading(true);
-        const response = await api.get(`/users/profile/${userName}`);
+        const response = await api.get(`/user/profile/${userName}`);
         setProfile(response.data.data.user);
         setError(null);
       } catch (err) {
