@@ -1,4 +1,3 @@
-// import { Toaster } from "@/components/ui/toaster";
 import { Toaster } from "./components/ui/toaster";
 import { Toaster as Sonner } from "./components/ui/sonner";
 import { TooltipProvider } from "./components/ui/tooltip";
@@ -7,10 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Context
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 // Route Guards
 import ProtectedRoute from "./routes/ProtectedRoute";
 import PublicRoute from "./routes/PublicRoute";
+import AdminRoute from "./routes/AdminRoute";
 
 // Pages
 import Index from "./pages/Index";
@@ -25,43 +26,62 @@ import RequestsList from "./pages/dashboard/RequestsList";
 import CreateRequest from "./pages/dashboard/CreateRequest";
 import RequestDetail from "./pages/dashboard/RequestDetail";
 import MyRequests from "./pages/dashboard/MyRequests";
+import Settings from "./pages/dashboard/Settings";
+import Notifications from "./pages/dashboard/Notifications";
+import Chats from "./pages/dashboard/Chats";
+import ChatRoom from "./pages/dashboard/ChatRoom";
+import UserSearch from "./pages/dashboard/UserSearch";
+import UserProfile from "./pages/dashboard/UserProfile";
+import Reports from "./pages/dashboard/Reports";
+import CreateReport from "./pages/dashboard/CreateReport";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner position="top-right" richColors />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Index />} />
-            
-            {/* Auth Routes */}
-            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-            <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner position="top-right" richColors />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Index />} />
 
-            {/* Protected Dashboard Routes */}
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-              <Route index element={<Dashboard />} />
-              <Route path="requests" element={<RequestsList />} />
-              <Route path="requests/create" element={<CreateRequest />} />
-              <Route path="requests/:id" element={<RequestDetail />} />
-              <Route path="my-requests" element={<MyRequests />} />
-              <Route path="chats" element={<Dashboard />} />
-              <Route path="notifications" element={<Dashboard />} />
-              <Route path="profile" element={<Dashboard />} />
-              <Route path="settings" element={<Dashboard />} />
-            </Route>
+              {/* Auth Routes */}
+              <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+              <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
 
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+              {/* Protected Dashboard Routes */}
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                <Route index element={<Dashboard />} />
+                <Route path="requests" element={<RequestsList />} />
+                <Route path="requests/create" element={<CreateRequest />} />
+                <Route path="requests/:id" element={<RequestDetail />} />
+                <Route path="my-requests" element={<MyRequests />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="notifications" element={<Notifications />} />
+                <Route path="chats" element={<Chats />} />
+                <Route path="chats/:id" element={<ChatRoom />} />
+                <Route path="users" element={<UserSearch />} />
+                <Route path="users/:userName" element={<UserProfile />} />
+                <Route path="report" element={<CreateReport />} />
+                <Route path="profile" element={<Settings />} />
+                
+                {/* Admin Only Routes */}
+                <Route path="admin/reports" element={
+                  <AdminRoute><Reports /></AdminRoute>
+                } />
+              </Route>
+
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

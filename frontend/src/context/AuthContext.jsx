@@ -50,25 +50,43 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  // Register
-  const register = useCallback(async (userData) => {
-    try {
-      const response = await api.post('/auth/register', userData);
-      const { user: newUser, token } = response.data.data;
-      
-      setAuthToken(token);
-      setStoredUser(newUser);
-      setUser(newUser);
-      setIsAuthenticated(true);
-      
-      toast.success('Account created successfully! Welcome to HYB! 🎉');
-      return { success: true, user: newUser };
-    } catch (error) {
-      const message = error.message || 'Registration failed';
-      toast.error(message);
-      return { success: false, error: message };
+ // Register - with multipart/form-data support for avatar
+const register = useCallback(async (userData) => {
+  try {
+    // Check if userData contains a File (avatar)
+    const hasFile = userData.avatar instanceof File;
+    
+    let response;
+    if (hasFile) {
+      const formData = new FormData();
+      Object.keys(userData).forEach(key => {
+        if (userData[key] !== undefined && userData[key] !== null) {
+          formData.append(key, userData[key]);
+        }
+      });
+      response = await api.post('/auth/register', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    } else {
+      response = await api.post('/auth/register', userData);
     }
-  }, []);
+    
+    const { user: newUser, token } = response.data.data;
+
+    setAuthToken(token);
+    setStoredUser(newUser);
+    setUser(newUser);
+    setIsAuthenticated(true);
+
+    toast.success('Account created successfully! Welcome to HYB! 🎉');
+    return { success: true, user: newUser };
+  } catch (error) {
+    const message = error.message || 'Registration failed';
+    toast.error(message);
+    return { success: false, error: message };
+  }
+}, []);
+
 
   // Login
   const login = useCallback(async (email, password) => {
