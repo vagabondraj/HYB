@@ -15,7 +15,7 @@ export const useNotifications = (enabled = true) => {
     
     try {
       setIsLoading(true);
-      const response = await api.get('/notifications');
+      const response = await api.get('/notification');
       const { notifications: data, unreadCount: count } = response.data.data;
       setNotifications(data || []);
       setUnreadCount(count || 0);
@@ -30,7 +30,7 @@ export const useNotifications = (enabled = true) => {
 
   const markAsRead = useCallback(async (notificationId) => {
     try {
-      await api.put(`/notifications/${notificationId}/read`);
+      await api.put(`/notification/${notificationId}/read`);
       setNotifications(prev =>
         prev.map(n => n._id === notificationId ? { ...n, isRead: true } : n)
       );
@@ -42,7 +42,7 @@ export const useNotifications = (enabled = true) => {
 
   const markAllAsRead = useCallback(async () => {
     try {
-      await api.put('/notifications/read-all');
+      await api.put('/notification/read-all');
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (err) {
@@ -52,7 +52,7 @@ export const useNotifications = (enabled = true) => {
 
   const deleteNotification = useCallback(async (notificationId) => {
     try {
-      await api.delete(`/notifications/${notificationId}`);
+      await api.delete(`/notification/${notificationId}`);
       setNotifications(prev => prev.filter(n => n._id !== notificationId));
       setUnreadCount(prev => {
         const notification = notifications.find(n => n._id === notificationId);

@@ -1,6 +1,6 @@
 import { 
   Heart, Home, HelpCircle, MessageSquare, Bell, User, Settings, 
-  LogOut, Menu, X, Plus, ChevronDown, Search, HandHeart, Flag
+  LogOut, Menu, X, Plus, ChevronDown, Search, HandHeart, Flag, Users, Sun, Moon
 } from 'lucide-react';
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
@@ -122,6 +122,74 @@ const DashboardLayout = () => {
           </div>
         </nav>
       </aside>
+      {/* ================= MOBILE SIDEBAR ================= */}
+      <AnimatePresence>
+        {isMobileSidebarOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="lg:hidden fixed inset-0 bg-black/50 z-40"
+              onClick={() => setIsMobileSidebarOpen(false)}
+            />
+
+            {/* Sidebar */}
+            <motion.aside
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="lg:hidden fixed left-0 top-0 h-screen w-64 bg-sidebar border-r border-sidebar-border z-50 flex flex-col"
+            >
+              {/* Header */}
+              <div className="h-16 flex items-center justify-between px-6 border-b border-sidebar-border">
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-3"
+                  onClick={() => setIsMobileSidebarOpen(false)}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                    <Heart className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <span className="text-xl font-display font-bold">HYB</span>
+                </Link>
+
+                <button
+                  onClick={() => setIsMobileSidebarOpen(false)}
+                  className="p-2 rounded-lg hover:bg-sidebar-accent"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Navigation */}
+              <nav className="flex-1 px-4 py-6 overflow-y-auto">
+                <div className="space-y-1">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setIsMobileSidebarOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all",
+                        isActive(item.path)
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      )}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      <span className="font-medium">{item.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </nav>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
 
       {/* ================= MAIN CONTENT ================= */}
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
@@ -144,27 +212,79 @@ const DashboardLayout = () => {
             </div>
 
             {/* Right */}
-            <div className="flex items-center gap-3">
-              {/* 🔽 ADDED: THEME TOGGLE */}
-              <Button variant="ghost" size="icon" onClick={toggleTheme}>
-                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </Button>
+          
+          <div className="flex items-center gap-3">
 
-              {/* 🔽 UPDATED: NOTIFICATIONS WITH BADGE */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative"
-                onClick={() => navigate('/dashboard/notifications')}
-              >
-                <Bell className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Button>
-            </div>
+            {/* Theme Toggle */}
+            <Button variant="ghost" size="icon" onClick={toggleTheme}>
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </Button>
+
+            {/* Notifications */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={() => navigate('/dashboard/notifications')}
+            >
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </Button>
+
+            {/* ================= USER AVATAR DROPDOWN ================= */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="focus:outline-none">
+                  <Avatar className="h-9 w-9 border border-border">
+                    <AvatarImage src={user?.avatar} alt={user?.fullName} />
+                    <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                      {getInitials(user?.fullName)}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col">
+                    <span className="font-medium truncate">
+                      {user?.fullName}
+                    </span>
+                    <span className="text-xs text-muted-foreground truncate">
+                      @{user?.userName}
+                    </span>
+                  </div>
+                </DropdownMenuLabel>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={() => navigate('/dashboard/profile')}>
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </DropdownMenuItem>
+
+                <DropdownMenuItem onClick={() => navigate('/dashboard/settings')}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
           </div>
         </header>
 

@@ -15,7 +15,7 @@ export const useChat = (chatId, enabled = true) => {
 
     try {
       setIsLoading(true);
-      const response = await api.get(`/chats/${chatId}/messages`);
+      const response = await api.get(`/chat/${chatId}/messages`);
       const data = response.data.data.messages || [];
       setMessages(data);
       if (data.length > 0) {
@@ -40,7 +40,7 @@ export const useChat = (chatId, enabled = true) => {
         formData.append('image', image);
       }
 
-      const response = await api.post(`/chats/${chatId}/messages`, formData, {
+      const response = await api.post(`/chat/${chatId}/messages`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -57,7 +57,7 @@ export const useChat = (chatId, enabled = true) => {
     if (!chatId) return;
 
     try {
-      await api.delete(`/chats/${chatId}/messages/${messageId}`);
+      await api.delete(`/chat/${chatId}/messages/${messageId}`);
       setMessages(prev => prev.filter(m => m._id !== messageId));
     } catch (err) {
       console.error('Failed to delete message:', err);
@@ -106,7 +106,7 @@ export const useChatList = (enabled = true) => {
 
     try {
       setIsLoading(true);
-      const response = await api.get('/chats');
+      const response = await api.get('/chat');
       setChats(response.data.data.chats || []);
       setError(null);
     } catch (err) {

@@ -21,158 +21,128 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Check if user is already logged in on mount
+  // 🔐 Initialize auth on app load
   useEffect(() => {
     const initializeAuth = async () => {
-      const storedUser = getStoredUser();
       const token = localStorage.getItem('accessToken');
-      
-      if (storedUser && token) {
-        try {
-          // Verify token by fetching current user
-          const response = await api.get('/auth/me');
-          const userData = response.data.data.user;
-          setUser(userData);
-          setStoredUser(userData);
-          setIsAuthenticated(true);
-        } catch (error) {
-          // Token invalid, clear everything
-          clearAuthData();
-          setUser(null);
-          setIsAuthenticated(false);
-        }
+
+      if (!token) {
+        clearAuthData();
+        setUser(null);
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
+
+      try {
+        const response = await api.get('/auth/me');
+        const userData = response.data.data.user;
+        setUser(userData);
+        setStoredUser(userData);
+      } catch (error) {
+        clearAuthData();
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     initializeAuth();
   }, []);
 
- // Register - with multipart/form-data support for avatar
-const register = useCallback(async (userData) => {
-  try {
-    // Check if userData contains a File (avatar)
-    const hasFile = userData.avatar instanceof File;
-    
-    let response;
-    if (hasFile) {
-      const formData = new FormData();
-      Object.keys(userData).forEach(key => {
-        if (userData[key] !== undefined && userData[key] !== null) {
-          formData.append(key, userData[key]);
-        }
-      });
-      response = await api.post('/auth/register', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-    } else {
-      response = await api.post('/auth/register', userData);
+  // 📝 Register
+  const register = useCallback(async (userData) => {
+    try {
+      const hasFile = userData.avatar instanceof File;
+      let response;
+
+      if (hasFile) {
+        const formData = new FormData();
+        Object.entries(userData).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            formData.append(key, value);
+          }
+        });
+        response = await api.post('/auth/register', formData);
+      } else {
+        response = await api.post('/auth/register', userData);
+      }
+
+      const { user: newUser, accessToken, refreshToken } = response.data.data;
+
+      setAuthToken(accessToken);
+      setRefreshToken(refreshToken);
+      setStoredUser(newUser);
+      setUser(newUser);
+
+      toast.success('Account created successfully! 🎉');
+      return { success: true, user: newUser };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Registration failed';
+      toast.error(message);
+      return { success: false, error: message };
     }
-    
-    const { user: newUser, token } = response.data.data;
+  }, []);
 
-    setAuthToken(token);
-    setStoredUser(newUser);
-    setUser(newUser);
-    setIsAuthenticated(true);
-
-    toast.success('Account created successfully! Welcome to HYB! 🎉');
-    return { success: true, user: newUser };
-  } catch (error) {
-    const message = error.message || 'Registration failed';
-    toast.error(message);
-    return { success: false, error: message };
-  }
-}, []);
-
-
-  // Login
+  // 🔑 Login
   const login = useCallback(async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       const { user: loggedInUser, accessToken, refreshToken } = response.data.data;
-      
+
       setAuthToken(accessToken);
       setRefreshToken(refreshToken);
       setStoredUser(loggedInUser);
       setUser(loggedInUser);
-      setIsAuthenticated(true);
-      
+
       toast.success(`Welcome back, ${loggedInUser.fullName}! 👋`);
       return { success: true, user: loggedInUser };
     } catch (error) {
-      const message = error.message || 'Login failed';
+      const message = error.response?.data?.message || 'Login failed';
       toast.error(message);
       return { success: false, error: message };
     }
   }, []);
 
-  // Logout
+  // 🚪 Logout
   const logout = useCallback(async () => {
     try {
       await api.post('/auth/logout');
-    } catch (error) {
-      // Continue with logout even if API call fails
-      console.error('Logout API error:', error);
+    } catch (_) {
+      // ignore API failure
     } finally {
       clearAuthData();
       setUser(null);
-      setIsAuthenticated(false);
       toast.success('Logged out successfully');
     }
   }, []);
 
-  // Update profile
+  // 👤 Update profile
   const updateProfile = useCallback(async (profileData) => {
     try {
       const formData = new FormData();
-      
-      Object.keys(profileData).forEach(key => {
-        if (profileData[key] !== undefined && profileData[key] !== null) {
-          formData.append(key, profileData[key]);
+      Object.entries(profileData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, value);
         }
       });
-      
-      const response = await api.put('/auth/update-profile', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      
+
+      const response = await api.put('/auth/update-profile', formData);
       const updatedUser = response.data.data.user;
+
       setUser(updatedUser);
       setStoredUser(updatedUser);
-      
-      toast.success('Profile updated successfully! ✨');
+      toast.success('Profile updated successfully ✨');
+
       return { success: true, user: updatedUser };
     } catch (error) {
-      const message = error.message || 'Failed to update profile';
+      const message = error.response?.data?.message || 'Profile update failed';
       toast.error(message);
       return { success: false, error: message };
     }
   }, []);
 
-  // Change password
-  const changePassword = useCallback(async (currentPassword, newPassword) => {
-    try {
-      const response = await api.put('/auth/change-password', {
-        currentPassword,
-        newPassword,
-      });
-      
-      const { token } = response.data.data;
-      setAuthToken(token);
-      
-      toast.success('Password changed successfully! 🔒');
-      return { success: true };
-    } catch (error) {
-      const message = error.message || 'Failed to change password';
-      toast.error(message);
-      return { success: false, error: message };
-    }
-  }, []);
-
-  // Refresh user data
+  // 🔄 Refresh user
   const refreshUser = useCallback(async () => {
     try {
       const response = await api.get('/auth/me');
@@ -180,8 +150,7 @@ const register = useCallback(async (userData) => {
       setUser(userData);
       setStoredUser(userData);
       return userData;
-    } catch (error) {
-      console.error('Failed to refresh user:', error);
+    } catch {
       return null;
     }
   }, []);
@@ -189,12 +158,10 @@ const register = useCallback(async (userData) => {
   const value = {
     user,
     isLoading,
-    isAuthenticated,
     register,
     login,
     logout,
     updateProfile,
-    changePassword,
     refreshUser,
   };
 

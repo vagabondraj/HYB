@@ -1,9 +1,10 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
+import { use } from 'react';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const location = useLocation();
 
   // Show loading spinner while checking auth status
@@ -19,7 +20,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   // Redirect to login if not authenticated
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
