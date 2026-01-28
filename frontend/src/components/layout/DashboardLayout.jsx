@@ -1,25 +1,7 @@
-// 🔽 UPDATED IMPORTS (added Flag, Moon, Sun)
-import {
-  Heart,
-  Home,
-  HelpCircle,
-  MessageSquare,
-  Bell,
-  User,
-  Settings,
-  LogOut,
-  Menu,
-  X,
-  Plus,
-  ChevronDown,
-  Search,
-  HandHeart,
-  Flag,
-  Moon,
-  Sun,
-  Users
+import { 
+  Heart, Home, HelpCircle, MessageSquare, Bell, User, Settings, 
+  LogOut, Menu, X, Plus, ChevronDown, Search, HandHeart, Flag
 } from 'lucide-react';
-
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';

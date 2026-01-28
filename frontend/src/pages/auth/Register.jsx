@@ -6,9 +6,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, EyeOff, Loader2, Mail, Lock, User, Building, Calendar, Home, Heart, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Loader2, Mail, Lock, User, Building, Calendar, Home, Heart, CheckCircle, Camera } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Mail,
+  Lock,
+  User,
+  Heart,
+  CheckCircle,
+  Camera
+} from 'lucide-react';
+
 
 const Register = () => {
   const navigate = useNavigate();
