@@ -5,7 +5,7 @@ import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import { Notification } from "../models/notification.models.js";
 import {validateReport} from "../utils/reportValidatorAI.js"
-import {REPORT_TRRESHOLD} from "../constants.js";
+import {BLOCK_THRESHOLD} from "../constants.js";
 
 const notifyAdmins = async (report, reporter, reportedUser) => {
   const admins = await User.find({ role: "admin" }).select("_id");
@@ -83,7 +83,7 @@ const createReport = asyncHandler(async (req, res) => {
     reportedUser.warningCount += 1;
     warningCount = reportedUser.warningCount;
 
-    if (warningCount >= REPORT_TRRESHOLD) {
+    if (warningCount >= BLOCK_THRESHOLD) {
       reportedUser.isBlocked = true;
       reportedUser.blockedAt = new Date();
       isBlocked = true;
@@ -148,6 +148,40 @@ const getAllReports = asyncHandler(async (req, res) => {
     }, "Report retrived successfully"));
 });
 
+const getReportById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const report = await Report.findById(id)
+    .populate('reporter', 'username email avatar')
+    .populate('reportedUser', 'username email avatar warningCount isBlocked');
+
+  if (!report) {
+    throw new ApiError(404, 'Report not found');
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, report, 'Report fetched successfully')
+  );
+});
+
+const getReportsByUser = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  const reports = await Report.find({ reportedUser: userId })
+    .populate('reporter', 'username avatar')
+    .sort({ createdAt: -1 });
+
+  const user = await User.findById(userId).select('username warningCount isBlocked');
+
+  return res.status(200).json(
+    new ApiResponse(200, {
+      user,
+      reports,
+      totalReports: reports.length
+    }, 'User reports fetched successfully')
+  );
+});
+
 const updateReport = asyncHandler(async (req, res, next) =>{
     const { status, reviewNotes} = req.body;
     
@@ -173,8 +207,55 @@ const updateReport = asyncHandler(async (req, res, next) =>{
     .json(new ApiResponse(200, {report}, "Report updated successfully"));
 });
 
+const unblockUser = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const { resetWarnings } = req.body;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  if (!user.isBlocked) {
+    throw new ApiError(400, 'User is not blocked');
+  }
+
+  // Unblock the user
+  user.isBlocked = false;
+  user.blockedAt = null;
+  user.blockReason = null;
+
+  // Optionally reset warning count
+  if (resetWarnings) {
+    user.warningCount = 0;
+  }
+
+  await user.save();
+
+  // Notify user about unblock
+  await Notification.create({
+    user: userId,
+    type: 'account_unblocked',
+    title: 'Account Restored',
+    message: '✅ Your account has been unblocked. Please follow community guidelines to avoid future restrictions.',
+    isRead: false
+  });
+
+  return res.status(200).json(
+    new ApiResponse(200, {
+      userId: user._id,
+      username: user.username,
+      isBlocked: user.isBlocked,
+      warningCount: user.warningCount
+    }, 'User unblocked successfully')
+  );
+});
+
 export {
     createReport,
     getAllReports,
-    updateReport
+    updateReport,
+    getReportById,
+    getReportsByUser,
+    unblockUser
 };
