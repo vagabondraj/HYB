@@ -1,17 +1,29 @@
 import { Router } from "express";
-import { verifyJWT, authorize } from "../middlewares/auth.middleware.js";
-import { createReport, getAllReports, updateReport } from "../controllers/report.controller.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
+import {checkBlockedUser} from "../middlewares/blockUser.middleware.js";
+import { createReport, getAllReports,getReportById, updateReport, getReportsByUser, unblockUser} from "../controllers/report.controller.js";
+import {isAdmin} from "../middlewares/admin.middleware.js";
 
 const router = Router();
 
 router.use(verifyJWT);
 
-router.post("/", createReport);
+router.post(
+  '/',
+  checkBlockedUser, 
+  createReport
+);
 
-router.get("/", authorize("admin", "moderator"),
-getAllReports);
+router.get("/user/:userId", isAdmin, getReportsByUser);
 
-router.put("/:id", authorize("admin", "moderator"),
-updateReport);
+router.post("/unblock/:userId", isAdmin, unblockUser);
+
+// General admin routes
+router.get("/", isAdmin, getAllReports);
+
+router.get("/:id", isAdmin, getReportById);
+
+router.patch("/:id/status", isAdmin, updateReport);
+
 
 export default router;
