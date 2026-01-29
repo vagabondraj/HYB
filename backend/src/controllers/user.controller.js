@@ -40,17 +40,14 @@ const uploadAvatar = asyncHandler(async (req, res, next) => {
         return next(new ApiError(400, "please upload an image"));
     }
 
-    const uploaded= await uploadOnCloudinary(req.file.path);
-    if(!uploaded?.url){
-        return next(new ApiError(500, "Avatar upload failed"));
-    }
+    const uploaded = await uploadOnCloudinary(req.file.path);
+
     const user = await User.findByIdAndUpdate(
-        req.user.id,
-        {avatar: uploaded.url},
-        {new: true,
-            select:"fullName userName avatar"
-        }
+      req.user.id,
+      { avatar: uploaded.secure_url }, 
+      { new: true, select: "fullName userName avatar" }
     );
+
     if(!user){
         return next(new ApiError(404, "User not found"));
     }

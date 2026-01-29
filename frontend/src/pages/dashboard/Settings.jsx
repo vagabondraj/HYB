@@ -11,7 +11,7 @@ import { Camera, Loader2, User, Lock, Eye, EyeOff, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Settings = () => {
-  const { user, updateProfile, changePassword, refreshUser } = useAuth();
+  const { user, updateProfile, updateAvatar, changePassword } = useAuth();
 
   // Profile state
   const [profileData, setProfileData] = useState({
@@ -60,25 +60,24 @@ const Settings = () => {
     setProfileData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleProfileSubmit = async (e) => {
-    e.preventDefault();
-    setIsUpdatingProfile(true);
+ const handleProfileSubmit = async (e) => {
+  e.preventDefault();
+  setIsUpdatingProfile(true);
 
-    const dataToUpdate = { ...profileData };
-    if (avatarFile) {
-      dataToUpdate.avatar = avatarFile;
-    }
+  // 1️⃣ Upload avatar separately
+  if (avatarFile) {
+    await updateAvatar(avatarFile);
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  }
 
-    const result = await updateProfile(dataToUpdate);
-    
-    if (result.success) {
-      setAvatarFile(null);
-      setAvatarPreview(null);
-      await refreshUser();
-    }
-    
-    setIsUpdatingProfile(false);
-  };
+  // 2️⃣ Update profile fields ONLY
+  await updateProfile(profileData);
+
+  setIsUpdatingProfile(false);
+};
+
+
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;

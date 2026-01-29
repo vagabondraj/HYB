@@ -118,6 +118,33 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+ const updateAvatar = useCallback(async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    const response = await api.put("/user/avatar", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data", // 🔥 IMPORTANT
+      },
+    });
+
+    const updatedUser = response.data.data.user;
+
+    setUser(updatedUser);
+    setStoredUser(updatedUser);
+
+    toast.success("Avatar updated successfully 🖼️");
+    return { success: true, user: updatedUser };
+  } catch (error) {
+    const message = error.response?.data?.message || "Avatar upload failed";
+    toast.error(message);
+    return { success: false, error: message };
+  }
+   }, []);
+
+
+
   // 👤 Update profile
   const updateProfile = useCallback(async (profileData) => {
     try {
@@ -163,6 +190,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateProfile,
+    updateAvatar,
     refreshUser,
   };
 
