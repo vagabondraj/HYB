@@ -7,32 +7,35 @@ import { Notification } from "../models/notification.models.js";
 
 const createReport = asyncHandler(async (req, res, next) => {
     const {reportedUserId, reason, description} = req.body;
+    if (!reportedUserId || !reason) {
+    throw new ApiError(400, "Reported user and reason are required");
+    }
 
     const reportedUser = await User.findById(reportedUserId);
     if(!reportedUser){
         return next(new ApiError(404, "User not found"));
     }
 
-    if(reportedUserId === req.user.id){
+    if(reportedUserId.toString() === req.user._id.toString()){
         return next(new ApiError(400, "Can't report yourself"));
     }
 
     const report = await Report.create({
         reportedUser:reportedUserId,
-        reportedBy:req.user.id,
+        reportedBy:req.user._id,
         reason,
         description
     });
 
     await Notification.create({
-    type: "report",
+    type: "REPORT_CREATED",
     message: `User @${reportedUser.userName} was reported by @${req.user.userName}`,
     meta: {
         reportId: report._id,
         reportedUser: reportedUserId,
-        reportedBy: req.user.id
+        reportedBy: req.user._id
     },
-    forRole: "admin",
+    forRole: ["admin", "moderator"],
     });
 
 

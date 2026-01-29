@@ -67,7 +67,14 @@ const App = () => (
                 <Route path="chats/:id" element={<ChatRoom />} />
                 <Route path="users" element={<UserSearch />} />
                 <Route path="users/:userName" element={<UserProfile />} />
-                <Route path="report" element={<CreateReport />} />
+                <Route
+                    path="report"
+                    element={
+                      <ProtectedRoute>
+                        <CreateReport />
+                      </ProtectedRoute>
+                    }
+                  />
                 <Route path="profile" element={<Profile />} />
                 
                 {/* Admin Only Routes */}
