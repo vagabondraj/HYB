@@ -10,16 +10,20 @@ const getMyNotifications = asyncHandler(async (req, res) => {
     const limitNum = parseInt(limit);
     const skip= (pageNum-1)*limitNum;
     
-    const notifications = await Notification.find({user: req.user.id})
-    .populate("request", "title status")
-    .sort({createdAt: -1})
-    .skip(skip)
-    .limit(limitNum);
+    const query = {
+    $or: [
+        { user: req.user.id },
+        ...(req.user.role === "admin" || req.user.role === "moderator"
+        ? [{ forRole: "admin" }]
+        : [])
+    ]
+    };
 
-    const total= await Notification.countDocuments({user: req.user.id});
+    const notifications = await Notification.find(query)
+    const total = await Notification.countDocuments(query);
     const unreadCount = await Notification.countDocuments({
-        user:req.user.id,
-        isRead:false
+    ...query,
+    isRead: false
     });
 
     return res

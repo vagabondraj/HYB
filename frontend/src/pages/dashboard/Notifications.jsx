@@ -6,6 +6,9 @@ import { Bell, Check, CheckCheck, Trash2, Loader2, RefreshCw } from 'lucide-reac
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+const isReportNotification = (notification) =>
+  notification.type === "REPORT_CREATED";
+
 const Notifications = () => {
   const {
     notifications,

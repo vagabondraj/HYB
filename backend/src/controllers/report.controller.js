@@ -3,6 +3,7 @@ import {User} from '../models/user.models.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import { Notification } from "../models/notification.models.js";
 
 const createReport = asyncHandler(async (req, res, next) => {
     const {reportedUserId, reason, description} = req.body;
@@ -22,6 +23,18 @@ const createReport = asyncHandler(async (req, res, next) => {
         reason,
         description
     });
+
+    await Notification.create({
+    type: "report",
+    message: `User @${reportedUser.userName} was reported by @${req.user.userName}`,
+    meta: {
+        reportId: report._id,
+        reportedUser: reportedUserId,
+        reportedBy: req.user.id
+    },
+    forRole: "admin",
+    });
+
 
     await report.populate("reportedUser", "fullName userName");
 

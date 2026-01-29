@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
+import api from '../../api/axios';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   HelpCircle, MessageSquare, Clock, TrendingUp, 
   Users, Heart, ArrowRight, Plus, CheckCircle,
@@ -12,13 +14,57 @@ import { motion } from 'framer-motion';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [statsData, setStatsData] = useState({
+  activeRequests: 0,
+  chats: 0,
+  });
+
+  useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      const [requestsRes, chatsRes] = await Promise.all([
+        api.get('/req?status=active'),
+        api.get('/chat'),
+      ]);
+
+      setStatsData({
+        activeRequests: requestsRes.data.data?.requests?.length || 0,
+        chats: chatsRes.data.data?.chats?.length || 0,
+      });
+    } catch (error) {
+      console.error('Failed to load dashboard stats', error);
+    }
+  };
+
+  fetchStats();
+}, []);
+
+
 
   const stats = [
-    { label: 'Active Requests', value: '—', icon: HelpCircle, color: 'text-primary' },
-    { label: 'Helping Others', value: '—', icon: Heart, color: 'text-accent' },
-    { label: 'Chats', value: '—', icon: MessageSquare, color: 'text-info' },
-    { label: 'Help Count', value: user?.helpCount || 0, icon: TrendingUp, color: 'text-success' },
-  ];
+  {
+    label: 'Active Requests',
+    value: 'Browse',
+    icon: HelpCircle,
+    color: 'text-primary',
+    path: '/dashboard/requests',
+  },
+  {
+    label: 'Chats',
+    value: 'Open',
+    icon: MessageSquare,
+    color: 'text-info',
+    path: '/dashboard/chats',
+  },
+  {
+    label: 'Help Count',
+    value: user?.helpCount || 0,
+    icon: TrendingUp,
+    color: 'text-success',
+  },
+];
+
 
   const container = {
     hidden: { opacity: 0 },
@@ -68,7 +114,15 @@ const Dashboard = () => {
       >
         {stats.map((stat, index) => (
           <motion.div key={stat.label} variants={item}>
-            <Card className="glass-card hover-lift">
+            <Card
+                className={`glass-card hover-lift ${stat.path ? 'cursor-pointer hover:border-primary' : ''}`}
+                onClick={() => {
+                  if (stat.path) {
+                    navigate(stat.path);
+                  }
+                }}
+              >
+
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className={`w-10 h-10 rounded-xl bg-muted flex items-center justify-center ${stat.color}`}>
@@ -76,6 +130,11 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <p className="text-2xl font-bold font-display">{stat.value}</p>
+                {stat.path && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Click to open
+                  </p>
+                )}
                 <p className="text-sm text-muted-foreground">{stat.label}</p>
               </CardContent>
             </Card>
