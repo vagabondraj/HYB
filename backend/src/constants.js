@@ -11,7 +11,7 @@ export const REQUEST_CATEGORIES = [
     "medicine",
     "notes",
     "sports",
-    "stationary",
+    "stationary", 
     "electronics",
     "books",
     "food",
@@ -64,8 +64,12 @@ export const NOTIFICATION_TYPES = [
     "response_accepted",
     "response_rejected",
     "request_fullfilled",
-    "new_message",
-    "system"
+    "message",
+    "system",
+    "report",           
+    "warning",          
+    "account_blocked",  
+    "account_unblocked"
 ];
 
 export const REPORT_REASON = [
