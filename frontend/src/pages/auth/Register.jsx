@@ -281,7 +281,7 @@ const result = await register(payload);
                       <Input
                         id="fullName"
                         name="fullName"
-                        placeholder="John Doe"
+                        placeholder="    Enter Name"
                         className="pl-9 h-10"
                         value={formData.fullName}
                         onChange={handleChange}
@@ -298,7 +298,7 @@ const result = await register(payload);
                     <Input
                       id="userName"
                       name="userName"
-                      placeholder="johndoe"
+                      placeholder="Enter username"
                       className="h-10"
                       value={formData.userName}
                       onChange={handleChange}
@@ -318,7 +318,7 @@ const result = await register(payload);
                       id="email"
                       name="email"
                       type="email"
-                      placeholder="you@example.com"
+                      placeholder="     abc@gmail.com"
                       className="pl-9 h-10"
                       value={formData.email}
                       onChange={handleChange}
@@ -339,7 +339,7 @@ const result = await register(payload);
                         id="password"
                         name="password"
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="••••••••"
+                        placeholder="     Enter Password"
                         className="pl-9 pr-9 h-10"
                         value={formData.password}
                         onChange={handleChange}
@@ -365,7 +365,7 @@ const result = await register(payload);
                         id="confirmPassword"
                         name="confirmPassword"
                         type={showConfirmPassword ? 'text' : 'password'}
-                        placeholder="••••••••"
+                        placeholder="Re-enter Password "
                         className="pr-9 h-10"
                         value={formData.confirmPassword}
                         onChange={handleChange}
@@ -393,7 +393,7 @@ const result = await register(payload);
                       <Input
                         id="branch"
                         name="branch"
-                        placeholder="CSE"
+                        placeholder="Enter branch"
                         className="h-9 text-sm"
                         value={formData.branch}
                         onChange={handleChange}
@@ -409,7 +409,7 @@ const result = await register(payload);
                         disabled={isLoading}
                       >
                         <SelectTrigger className="h-9 text-sm">
-                          <SelectValue placeholder="Year" />
+                          <SelectValue placeholder="Enter year" />
                         </SelectTrigger>
                         <SelectContent>
                           {[1, 2, 3, 4, 5].map(year => (
@@ -424,7 +424,7 @@ const result = await register(payload);
                       <Input
                         id="hostel"
                         name="hostel"
-                        placeholder="H1"
+                        placeholder="  Enter hostel name"
                         className="h-9 text-sm"
                         value={formData.hostel}
                         onChange={handleChange}

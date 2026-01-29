@@ -56,6 +56,7 @@ const createResponse = asyncHandler(async (req, res) => {
           user: request.requestedBy,
           type: "new_response",
           request: request._id,
+          title: `${req.user.fullName} wants to help`,
           message: `${req.user.fullName} want to help with your request`
       });
     } catch (error) {
@@ -205,6 +206,7 @@ const acceptResponse = asyncHandler(async (req, res) => {
       user: response.responder,
       type: "response_accepted",
       request: request._id,
+      title: `Help accepted by ${req.user.fullName}`,
       message: `Your help offer was accepted by ${req.user.fullName}`
     });
   } catch (error) {
@@ -249,6 +251,7 @@ const rejectResponse = asyncHandler(async (req, res) => {
       user: response.responder,
       type: "response_rejected",
       request: request._id,
+      title: "Help offer declined",
       message: "Your help offer was declined"
     });
   } catch (error) {

@@ -101,14 +101,28 @@ const sendMessage = asyncHandler(async (req, res) => {
   );
 
  try {
-     await Notification.create({
-       user: receiver,
-       type: 'new_message',
-       request: chat.request,
-       message: `New message from ${req.user.fullName}`
-     });
+    // determine receiver id (handles ObjectId or populated doc)
+    const receiverDoc = chat.participants.find(p => (p._id ? p._id.toString() : p.toString()) !== req.user.id);
+    const receiverId = receiverDoc ? (receiverDoc._id ? receiverDoc._id : receiverDoc) : null;
+
+    console.log('sendMessage: participants=', chat.participants);
+    console.log('sendMessage: sender=', req.user.id, req.user.fullName);
+    console.log('sendMessage: receiverDoc=', receiverDoc);
+    console.log('sendMessage: receiverId=', receiverId);
+
+    const notifPayload = {
+      user: receiverId,
+      type: 'message',
+      request: chat.request,
+      title: `Message from ${req.user.fullName}`,
+      message: `New message from ${req.user.fullName}`
+    };
+    console.log('sendMessage: creating notification', notifPayload);
+
+    await Notification.create(notifPayload);
+    console.log('sendMessage: notification created');
  } catch (error) {
-    console.log("Sendmessage error", error.message);
+    console.log("Sendmessage error", error.message, error);
  }
 
   return res
