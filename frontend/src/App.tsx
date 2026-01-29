@@ -18,6 +18,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import Profile from "./pages/dashboard/Profile";
 
 // Dashboard
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -42,7 +43,7 @@ const App = () => (
     <ThemeProvider>
       <TooltipProvider>
         <Toaster />
-        <Sonner position="top-right" richColors />
+        <Sonner position="bottom-center" richColors />
         <BrowserRouter>
           <AuthProvider>
             <Routes>
@@ -67,7 +68,7 @@ const App = () => (
                 <Route path="users" element={<UserSearch />} />
                 <Route path="users/:userName" element={<UserProfile />} />
                 <Route path="report" element={<CreateReport />} />
-                <Route path="profile" element={<Settings />} />
+                <Route path="profile" element={<Profile />} />
                 
                 {/* Admin Only Routes */}
                 <Route path="admin/reports" element={

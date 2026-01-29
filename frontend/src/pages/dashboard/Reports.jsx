@@ -21,7 +21,7 @@ const Reports = () => {
     try {
       setIsLoading(true);
       const query = statusFilter !== 'all' ? `?status=${statusFilter}` : '';
-      const response = await api.get(`/reports${query}`);
+      const response = await api.get(`/report${query}`);
       setReports(response.data.data.reports || []);
     } catch (err) {
       toast.error('Failed to fetch reports');
@@ -32,7 +32,7 @@ const Reports = () => {
 
   const updateReport = async (reportId, status) => {
     try {
-      await api.put(`/reports/${reportId}`, { status });
+      await api.put(`/report/${reportId}`, { status });
       setReports(prev =>
         prev.map(r => r._id === reportId ? { ...r, status } : r)
       );
