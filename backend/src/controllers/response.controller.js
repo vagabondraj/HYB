@@ -79,18 +79,34 @@ const getResponsesForRequest = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Request not found");
   }
 
-  if (request.requestedBy.toString() !== req.user._id.toString()) {
-    throw new ApiError(403, "Not authorized to view responses");
+   let responses;
+
+  // ✅ Case 1: request owner → see all responses
+  if (request.requestedBy.toString() === req.user._id.toString()) {
+    responses = await Response.find({ request: requestId });
+  } 
+  // ✅ Case 2: responder → see only own response
+  else {
+    responses = await Response.find({
+      request: requestId,
+      responder: req.user._id
+    });
+
+    if (!responses.length) {
+      throw new ApiError(403, "Not authorized to view responses");
+    }
   }
 
-  const responses = await Response.find({ request: requestId })
-    .populate("responder", "fullName userName avatar branch year helpCount")
-    .sort({ createdAt: -1 });
+  // ✅ populate responder info
+  responses = await Response.populate(responses, {
+    path: "responder",
+    select: "fullName userName avatar branch year helpCount"
+  });
 
-  res.status(200).json(
+  return res.status(200).json(
     new ApiResponse(200, { responses }, "Responses retrieved successfully")
   );
-});
+ });
 
 const getMyResponses = asyncHandler(async (req, res) => {
   const page = Number(req.query.page) || 1;
