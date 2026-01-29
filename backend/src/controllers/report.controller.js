@@ -4,6 +4,7 @@ import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import { Notification } from "../models/notification.models.js";
+import {validateReport} from "../utils/reportValidatorAI.js"
 
 const createReport = asyncHandler(async (req, res, next) => {
     const {reportedUserId, reason, description} = req.body;

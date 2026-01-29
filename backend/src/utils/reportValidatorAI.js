@@ -106,7 +106,7 @@ const analyzeReportSeverity = async ({ reason, description }) => {
   }
 };
 
-exports = {
+export {
   validateReport,
   analyzeReportSeverity
 };

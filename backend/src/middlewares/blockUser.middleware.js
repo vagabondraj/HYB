@@ -90,7 +90,7 @@ const isUserBlocked = async (userId) => {
   }
 };
 
-exports = {
+export{
   checkBlockedUser,
   warnBlockedUser,
   isUserBlocked
