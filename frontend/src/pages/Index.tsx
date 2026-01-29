@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart, Users, MessageSquare, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
+import { Users, MessageSquare, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
@@ -16,9 +16,11 @@ const Index = () => {
       <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-xl border-b border-border z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-              <Heart className="w-5 h-5 text-primary-foreground" />
-            </div>
+            <img
+              src="/logo.png"
+              alt="HYB Logo"
+              className="w-9 h-9 object-contain"
+            />
             <span className="text-xl font-display font-bold">HYB</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -105,10 +107,15 @@ const Index = () => {
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <Heart className="w-4 h-4 text-primary" />
-            <span>HYB - Help Your Buddy</span>
-          </div>
-          <p>Built with ❤️ for students</p>
+          <img
+            src="/logo.png"
+            alt="HYB Logo"
+            className="w-4 h-4 object-contain"
+          />
+          <span>HYB - Help Your Buddy</span>
+        </div>
+        <p>Built for students</p>
+
         </div>
       </footer>
     </div>

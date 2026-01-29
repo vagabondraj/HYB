@@ -233,28 +233,37 @@ const result = await register(payload);
                {/* Avatar Upload */}
               <div className="flex justify-center mb-4">
                 <div className="relative">
-                  <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-border">
-                    {avatarPreview ? (
-                      <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <User className="w-8 h-8 text-muted-foreground" />
-                    )}
-                  </div>
-                  <label
-                    htmlFor="avatar-upload"
-                    className="absolute bottom-0 right-0 p-1.5 bg-primary text-primary-foreground rounded-full cursor-pointer hover:bg-primary/90 transition-colors"
-                  >
-                    <Camera className="w-3 h-3" />
-                    <input
-                      id="avatar-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleAvatarChange}
-                      disabled={isLoading}
+                <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-dashed border-border">
+                  {avatarPreview ? (
+                    <img
+                      src={avatarPreview}
+                      alt="Avatar preview"
+                      className="w-full h-full object-cover"
                     />
-                  </label>
+                  ) : (
+                    <User className="w-10 h-10 text-muted-foreground" />
+                  )}
                 </div>
+
+                <label
+                htmlFor="avatar-upload"
+                className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground
+                          rounded-full cursor-pointer flex items-center justify-center
+                          shadow-md hover:bg-primary/90 transition-all"
+                    >
+                  <Camera className="w-4 h-4" />
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                    disabled={isLoading}
+                  />
+                </label>
+
+              </div>
+
               </div>
               {errors.avatar && (
                 <p className="text-xs text-destructive text-center mb-2">{errors.avatar}</p>

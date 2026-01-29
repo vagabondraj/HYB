@@ -1,5 +1,5 @@
 import { 
-  Heart, Home, HelpCircle, MessageSquare, Bell, User, Settings, 
+   Home, HelpCircle, MessageSquare, Bell, User, Settings, 
   LogOut, Menu, X, Plus, ChevronDown, Search, HandHeart, Flag, Users, Sun, Moon
 } from 'lucide-react';
 import { useState } from 'react';
@@ -62,9 +62,11 @@ const DashboardLayout = () => {
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
           <Link to="/dashboard" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <Heart className="w-5 h-5 text-primary-foreground" />
-            </div>
+            <img
+              src="/logo.png"
+              alt="HYB Logo"
+              className="w-10 h-10 object-contain"
+            />
             <span className="text-xl font-display font-bold text-sidebar-foreground">HYB</span>
           </Link>
         </div>
@@ -150,10 +152,11 @@ const DashboardLayout = () => {
                   className="flex items-center gap-3"
                   onClick={() => setIsMobileSidebarOpen(false)}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                    <Heart className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  <span className="text-xl font-display font-bold">HYB</span>
+                  <img
+                    src="/logo.png"
+                    alt="HYB Logo"
+                    className="w-10 h-10 object-contain"
+                  />
                 </Link>
 
                 <button
