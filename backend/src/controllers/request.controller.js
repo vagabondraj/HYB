@@ -295,6 +295,17 @@ const deleteRequest = asyncHandler(async(req, res) => {
     .json(new ApiResponse(200, {}, "Request deleted successfully"));
 });
 
+const getRequestStats = async (req, res) => {
+  const activeRequests = await Request.countDocuments({ status: "active" });
+
+  res.status(200).json({
+    success: true,
+    data: {
+      activeRequests,
+    },
+  });
+};
+
 export {
   createRequest,
   getAllRequests,
@@ -304,5 +315,6 @@ export {
   updateRequest,
   cancelRequest,
   fulfillRequest,
-  deleteRequest
+  deleteRequest,
+  getRequestStats
 };

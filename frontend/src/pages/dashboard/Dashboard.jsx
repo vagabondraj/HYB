@@ -24,12 +24,12 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       const [requestsRes, chatsRes] = await Promise.all([
-        api.get('/req?status=active'),
+        api.get('/req/stats'),
         api.get('/chat'),
       ]);
 
       setStatsData({
-        activeRequests: requestsRes.data.data?.requests?.length || 0,
+        activeRequests: requestsRes.data.data?.activeRequests || 0,
         chats: chatsRes.data.data?.chats?.length || 0,
       });
     } catch (error) {
