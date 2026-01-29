@@ -1,6 +1,7 @@
 import {User} from '../models/user.models.js';
 import {Request} from '../models/request.models.js';
 import {Response} from '../models/response.models.js';
+import { Notification } from '../models/notification.models.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
@@ -80,8 +81,114 @@ const searchUsers = asyncHandler(async (req, res, next) =>{
     .json(new ApiResponse(200, { users }, "user found successfully"));
 });
 
+const getCurrentUser = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const user = await User.findById(userId).select("-password -refreshToken");
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        ...user.toObject(),
+        warningCount: user.warningCount || 0,
+        isBlocked: user.isBlocked || false,
+      },
+      "User fetched successfully"
+    )
+  );
+});
+
+const getBlockedUsers = asyncHandler(async (req, res) => {
+  const blockedUsers = await User.findBlockedUsers();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, blockedUsers, "Blocked users fetched successfully"));
+});
+
+const getAtRiskUsers = asyncHandler(async (req, res) => {
+  const threshold = parseInt(req.query.threshold) || 8;
+
+  const atRiskUsers = await User.findAtRiskUsers(threshold);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, atRiskUsers, "At-risk users fetched successfully"));
+});
+
+const getUserWarningHistory = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  const user = await User.findById(userId)
+    .select("userName email warningCount isBlocked blockedAt blockReason reportHistory")
+    .populate({
+      path: "reportHistory.reportId",
+      select: "reason description status createdAt isValidated",
+    });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User warning history fetched successfully"));
+});
+
+const resetUserWarnings = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const { resetCount = true, unblock = true } = req.body;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (resetCount) {
+    user.warningCount = 0;
+    user.reportHistory = [];
+  }
+
+  if (unblock && user.isBlocked) {
+    user.isBlocked = false;
+    user.blockedAt = null;
+    user.blockReason = null;
+  }
+
+  await user.save();
+
+  await Notification.create({
+    user: userId,
+    type: "account_unblocked",
+    title: "Account Restored",
+    message: "✅ Your account warnings have been reset by an administrator.",
+    isRead: false,
+  });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        warningCount: user.warningCount,
+        isBlocked: user.isBlocked,
+      },
+      "User warnings reset successfully"
+    )
+  );
+});
+
 export{
     getUserProfile,
     uploadAvatar,
-    searchUsers
+    searchUsers,
+    getCurrentUser,
+    getBlockedUsers,
+    getAtRiskUsers,
+    getUserWarningHistory,
+    resetUserWarnings
 }
