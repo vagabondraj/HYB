@@ -5,7 +5,7 @@ import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import { Notification } from "../models/notification.models.js";
 import {validateReport} from "../utils/reportValidatorAI.js"
-import {BLOCK_THRESHOLD} from "../constants.js";
+import { BLOCK_THRESHOLD} from "../constants.js";
 
 const notifyAdmins = async (report, reporter, reportedUser) => {
   const admins = await User.find({ role: "admin" }).select("_id");
@@ -57,16 +57,38 @@ const createReport = asyncHandler(async (req, res) => {
   }
 
   const reporter = await User.findById(req.user._id);
+  if (!reporter) {
+  throw new ApiError(401, "Reporter not found");
+  }
 
-  const isValidReport = await validateReport({
-    reason,
-    description: description || "",
-  });
 
+  let isValidReport = false;
+    try {
+      isValidReport = await validateReport({
+        reason,
+        description: description || "",
+      });
+    } catch (error) {
+      console.error("AI validation failed:", error.message);
+      isValidReport = false; // fallback to manual review
+    }
+
+  const normalizedReason = reason
+  .toLowerCase()
+  .trim()
+  .replace(/\s+/g, "_");
+
+    // map common phrases → valid enums
+    const reasonMap = {
+      "harassment_or_bullying": "harassment",
+      "bullying": "harassment",
+    };
+
+  const finalReason = reasonMap[normalizedReason] || normalizedReason;
   const report = await Report.create({
     reportedUser: reportedUserId,
-    reportedBy: req.user._id,
-    reason,
+    reporter: req.user._id,
+    reason: finalReason,
     description: description || "",
     status: "pending",
     isValidated: isValidReport,
@@ -80,7 +102,7 @@ const createReport = asyncHandler(async (req, res) => {
   let isBlocked = reportedUser.isBlocked;
 
   if (isValidReport) {
-    reportedUser.warningCount += 1;
+    reportedUser.warningCount = (reportedUser.warningCount || 0) + 1;
     warningCount = reportedUser.warningCount;
 
     if (warningCount >= BLOCK_THRESHOLD) {
@@ -131,7 +153,7 @@ const getAllReports = asyncHandler(async (req, res) => {
 
     const reports=await Report.find(query)
     .populate("reportedUser", "fullName userName email warningCount isBlocked")
-    .populate("reportedBy", "fullName userName")
+    .populate("reporter", "fullName userName")
     .populate("reviewedBy", "fullName userName")
     .sort({createdAt: -1})
     .skip(skip)

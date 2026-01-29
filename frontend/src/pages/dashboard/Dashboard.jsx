@@ -42,17 +42,17 @@ const Dashboard = () => {
 
 
 
-  const stats = [
+const stats = [
   {
     label: 'Active Requests',
-    value: 'Browse',
+    value: statsData.activeRequests,
     icon: HelpCircle,
     color: 'text-primary',
     path: '/dashboard/requests',
   },
   {
     label: 'Chats',
-    value: 'Open',
+    value: statsData.chats,
     icon: MessageSquare,
     color: 'text-info',
     path: '/dashboard/chats',
@@ -64,6 +64,7 @@ const Dashboard = () => {
     color: 'text-success',
   },
 ];
+
 
 
   const container = {
