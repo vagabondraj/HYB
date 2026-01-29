@@ -89,13 +89,16 @@ const Login = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Heart className="w-8 h-8 text-white" />
-              </div>
-              <span className="text-4xl font-display font-bold">HYB</span>
-            </div>
-            
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <img
+                src="/logo.png"
+                alt="HYB logo"
+                className="w-10 h-10 object-contain"
+              />
+              <span className="text-2xl font-bold text-primary">
+                HYB
+              </span>
+            </div>        
             <h1 className="text-5xl font-display font-bold leading-tight mb-6">
               Help Your<br />Buddy
             </h1>
@@ -138,12 +141,17 @@ const Login = () => {
           transition={{ duration: 0.5 }}
         >
           {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center">
-              <Heart className="w-6 h-6 text-primary-foreground" />
+            <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
+              <img
+                src="/logo.png"
+                alt="HYB logo"
+                className="w-10 h-10 object-contain"
+              />
+              <span className="text-3xl font-display font-bold gradient-text">
+                HYB
+              </span>
             </div>
-            <span className="text-3xl font-display font-bold gradient-text">HYB</span>
-          </div>
+
 
           <Card className="border-0 shadow-xl">
             <CardHeader className="space-y-1 text-center pb-6">

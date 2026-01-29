@@ -91,9 +91,13 @@ const UserSearch = () => {
             >
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
-                  <Avatar className="w-14 h-14">
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-lg">
+                  <Avatar className="w-12 h-12 shrink-0">
+                    <AvatarImage
+                      src={user.avatar}
+                      alt={user.fullName}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
                       {getInitials(user.fullName)}
                     </AvatarFallback>
                   </Avatar>
