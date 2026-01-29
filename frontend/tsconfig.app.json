@@ -30,6 +30,7 @@
     "useDefineForClassFields": true
   },
   "include": [
-    "src"
+    "src",
+    "env.d.ts"
   ]
 }

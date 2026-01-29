@@ -11,18 +11,21 @@ const allowedOrigins = process.env.CORS_ORIGIN
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (Postman, server-to-server)
+      // Allow server-to-server, Postman, Render health checks
       if (!origin) return callback(null, true);
 
+      // Allow listed frontend origins
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      return callback(new Error("Not allowed by CORS"));
+      // ❌ Do NOT throw error — just block silently
+      return callback(null, false);
     },
     credentials: true,
   })
 );
+
 
 app.use(express.json({
     limit: "20kb"
