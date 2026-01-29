@@ -4,6 +4,8 @@ export const TEMP_UPLOAD_DIR = "public/temp";
 
 export const DELETE_WINDOW_MINUTES = 5;
 
+export const BLOCK_THRESHOLD = 11;
+
 // request categories
 export const REQUEST_CATEGORIES = [
     "medicine",

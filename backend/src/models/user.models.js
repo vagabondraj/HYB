@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { USER_ROLE } from "../constants.js";
+import { BLOCK_THRESHOLD, USER_ROLE } from "../constants.js";
+
+// const UserSchemaAddition
 
 const userSchema = new mongoose.Schema({
   fullName: {
@@ -61,6 +63,44 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date
   },
+
+
+
+  warningCount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  
+  // Block status - set to true when warningCount >= 11
+  isBlocked: {
+    type: Boolean,
+    default: false
+  },
+
+  blockedAt: {
+    type: Date,
+    default: null
+  },
+  
+  blockReason: {
+    type: String,
+    default: null
+  },
+  
+  // Optional: Array of report IDs that contributed to warnings
+  reportHistory: [{
+    reportId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Report'
+    },
+    reportedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+
+
   refreshToken: {
   type: String,
   select: false
@@ -84,6 +124,58 @@ userSchema.pre("save", async function () {
 // Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+userSchema.methods.incrementWarning = async function(reportId = null) {
+  this.warningCount += 1;
+  
+  // Add to report history if reportId provided
+  if (reportId) {
+    this.reportHistory.push({
+      reportId,
+      reportedAt: new Date()
+    });
+  }
+  
+  // Check if user should be blocked (threshold: 11 warnings)
+  if (this.warningCount >= BLOCK_THRESHOLD && !this.isBlocked) {
+    this.isBlocked = true;
+    this.blockedAt = new Date();
+    this.blockReason = 'Automatically blocked due to excessive reports';
+  }
+  
+  await this.save();
+  
+  return {
+    warningCount: this.warningCount,
+    isBlocked: this.isBlocked
+  };
+};
+
+userSchema.methods.unblockUser = async function() {
+  this.isBlocked = false;
+  this.blockedAt = null;
+  this.blockReason = null;
+  // Optionally reset warning count or keep history
+  // this.warningCount = 0;
+  
+  await this.save();
+  
+  return {
+    isBlocked: this.isBlocked,
+    warningCount: this.warningCount
+  };
+};
+
+userSchema.statics.findBlockedUsers = function() {
+  return this.find({ isBlocked: true }).select('-password -refreshToken');
+};
+
+userSchema.statics.findAtRiskUsers = function(threshold = 8) {
+  return this.find({ 
+    warningCount: { $gte: threshold },
+    isBlocked: false 
+  }).select('-password -refreshToken');
 };
 
 // generate access token
